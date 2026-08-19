@@ -316,8 +316,29 @@ GET	/api/analytics/audit-logs	Admin	Retrieve audit logs
 
 ## Screenshots
 
-Screenshots demonstrating the voting interface, dashboards,
-authentication workflow, and election management will be added here.
+### Authentication
+
+![VoxUnite Login](screenshots/login.png)
+
+### OTP Verification
+
+![OTP Verification](screenshots/otp-verification.png)
+
+### Student Dashboard
+
+![Student Dashboard](screenshots/student-dashboard.png)
+
+### Voting
+
+![Voting Interface](screenshots/voting.png)
+
+### Administrator Dashboard
+
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+### Election Results
+
+![Election Results](screenshots/results.png)
 
 ## Future Improvements
 
