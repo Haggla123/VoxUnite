@@ -12,7 +12,7 @@ modern full-stack voting system.
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 University elections can involve large numbers of students, multiple
 candidates, different voting positions, and administrative processes
@@ -34,7 +34,7 @@ software and digital voting workflows.
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 ### Student Voting
 
@@ -69,7 +69,7 @@ software and digital voting workflows.
 
 ---
 
-## 🔐 Security & Privacy
+##  Security & Privacy
 
 VoxUnite incorporates several mechanisms intended to protect the
 integrity of the voting process.
@@ -132,7 +132,7 @@ academic project.
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
 VoxUnite uses a client-server architecture consisting of a React
 frontend, Node.js/Express backend, and MongoDB database.
