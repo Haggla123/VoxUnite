@@ -1,180 +1,383 @@
-# VoxUnite — Secure University Digital Voting Platform
+# VoxUnite
 
-A production-grade MERN stack university election platform with enterprise-level security, real-time monitoring, and premium UI/UX.
+### Secure University Digital Voting Platform
 
-![VoxUnite](https://img.shields.io/badge/VoxUnite-Secure_Democracy-6366f1?style=for-the-badge)
+VoxUnite is a web-based university digital voting platform designed
+to support secure election management, voter authentication, ballot
+integrity, and privacy-aware voting workflows.
 
-## 🏗️ Architecture
+The project explores how authentication, authorization, vote
+integrity, and election-management mechanisms can be combined in a
+modern full-stack voting system.
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Framer Motion |
-| **Backend** | Node.js, Express.js, TypeScript |
-| **Database** | MongoDB, Mongoose |
-| **Real-time** | Socket.io |
-| **Auth** | JWT, OTP verification |
-| **Charts** | Recharts |
+---
 
-## 🚀 Quick Start
+## 🎯 Project Overview
 
-### Prerequisites
-- Node.js 18+
-- MongoDB running locally (or MongoDB Atlas URI)
+University elections can involve large numbers of students, multiple
+candidates, different voting positions, and administrative processes
+that are difficult to manage manually.
 
-### 1. Clone and Install
+VoxUnite provides a centralized platform for:
 
-```bash
-# Server
-cd server
-npm install
+- Voter authentication and verification
+- Election creation and management
+- Candidate management
+- Secure vote submission
+- Double-vote prevention
+- Election monitoring
+- Audit logging
+- Election analytics
 
-# Client
-cd ../client
-npm install --legacy-peer-deps
-```
+The system is designed as an academic project for exploring secure
+software and digital voting workflows.
 
-### 2. Configure Environment
+---
 
-Edit `server/.env`:
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/voxunite
-JWT_SECRET=your_secret_key
-CORS_ORIGIN=http://localhost:5173
-```
+## ✨ Key Features
 
-### 3. Seed Demo Data
+### Student Voting
 
-```bash
-cd server
-npm run seed
-```
+- Student authentication using Student ID and email
+- OTP-based verification
+- Election and candidate viewing
+- Manifesto viewing
+- Secure vote submission
+- Vote confirmation/receipt
+- Mobile-responsive voting interface
+- Prevention of repeated voting
 
-This creates:
-- **Admin**: admin@university.edu / Admin@VoxUnite2024
-- **200 eligible students** across 6 faculties
-- **Active election** with 9 candidates across 4 positions
+### Administration
 
-### 4. Start Development
+- Administrator authentication
+- Voter import using CSV/XLSX
+- Candidate management
+- Election creation and management
+- Election lifecycle management
+- Election activation and closure
+- Searchable audit logs
+- Election analytics
 
-```bash
-# Terminal 1: Server
-cd server
-npm run dev
+### Election Monitoring
 
-# Terminal 2: Client
-cd client
-npm run dev
-```
+- Real-time election activity
+- Faculty participation statistics
+- Turnout monitoring
+- Countdown timer
+- Participation leaderboard
+- Socket.io-based updates
 
-Open http://localhost:5173
+---
 
-## 🔐 Authentication Flow
+## 🔐 Security & Privacy
 
-### Student Login
-1. Enter Student ID + Email (e.g., `STU2024000` / `adaeze.okafor0@university.edu`)
-2. Receive OTP (shown in UI for demo mode)
-3. Verify OTP → JWT session created
-4. Vote once → session becomes read-only
+VoxUnite incorporates several mechanisms intended to protect the
+integrity of the voting process.
 
-### Admin Login
-- Email: `admin@university.edu`
-- Password: `Admin@VoxUnite2024`
+### Authentication
 
-## 🛡️ Security Features
+Student authentication uses:
 
-- **Triple-layer double-vote prevention** (session, backend, database unique index)
-- **OTP with expiry and retry limits** (5 min expiry, 3 max retries)
-- **Immutable votes** (cannot be edited or deleted after submission)
-- **Role-based access control** (admin/student JWT middleware)
-- **Comprehensive audit logging** (every action tracked)
-- **Anonymous voting** (voter identity never linked to ballot content)
+1. Student identification
+2. Email verification
+3. One-time password (OTP)
+4. JWT-based authenticated session
 
-## 📋 Features
+OTP verification includes an expiry period and retry limitations.
 
-### Student
-- 🗳️ Ceremonial voting booth with manifesto reading
-- 📱 Mobile-responsive voting experience
-- 🧾 Vote receipt confirmation
-- 📊 Live election monitor
+### Authorization
 
-### Admin
-- 📤 CSV/XLSX voter import with smart header normalization
-- 🏛️ Full election lifecycle management (Draft → Active → Closed)
-- 👤 Candidate management with photo upload
-- 📈 Enterprise analytics dashboard
-- 📝 Searchable audit logs
-- 🔴 Live results mode toggle (Safe/Live)
+Role-based access control separates administrative functionality
+from student voting functionality.
 
-### Live Monitor
-- ⏱️ Real-time countdown timer
-- 📊 Faculty turnout charts
-- 🔴 Live activity feed
-- 🏆 Faculty participation leaderboard
-- 📡 Socket.io real-time updates
+Protected API routes use authentication and authorization middleware
+to restrict access according to the user's role.
 
-## 🗂️ Project Structure
+### Double-Vote Prevention
 
-```
-E-vote/
-├── server/
-│   ├── src/
-│   │   ├── models/          # MongoDB schemas
-│   │   ├── routes/           # API endpoints
-│   │   ├── middleware/       # Auth, validation, upload
-│   │   ├── services/         # OTP, audit, parser
-│   │   ├── index.ts          # Server entry
-│   │   └── seed.ts           # Demo data seeder
-│   └── uploads/              # File storage
+The system implements multiple layers of protection against repeated
+voting:
+
+- Client/session-level controls
+- Backend validation
+- Database-level uniqueness constraints
+
+This layered approach is intended to reduce the possibility of a
+student submitting more than one ballot for the same election.
+
+### Vote Immutability
+
+After a vote is submitted, the system does not provide a normal
+workflow for editing or deleting the submitted ballot.
+
+This is intended to preserve ballot integrity after submission.
+
+### Audit Logging
+
+Administrative and system activities are recorded through an audit
+logging mechanism.
+
+Audit records can be reviewed by authorized administrators to support
+system monitoring and accountability.
+
+### Privacy Considerations
+
+The voting workflow is designed to reduce direct association between
+voter authentication and ballot content.
+
+However, anonymity in a real-world election system is a complex
+security and privacy property that requires formal analysis and
+additional controls beyond the mechanisms implemented in this
+academic project.
+
+---
+
+## 🏗️ System Architecture
+
+VoxUnite uses a client-server architecture consisting of a React
+frontend, Node.js/Express backend, and MongoDB database.
+
+
+┌─────────────────────────────────────────────────────┐
+│                     USERS                           │
+│                                                     │
+│       Students                  Administrators      │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│                 REACT FRONTEND                      │
+│                                                     │
+│  Authentication │ Voting │ Elections │ Analytics    │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                  REST API / HTTP
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│              NODE.JS / EXPRESS                      │
+│                                                     │
+│ Routes │ Middleware │ Services │ Validation         │
+│ Authentication │ Authorization │ Audit Logging      │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│                    MONGODB                          │
+│                                                     │
+│ Users │ Elections │ Candidates │ Votes │ Audit Logs │
+└─────────────────────────────────────────────────────┘
+
+             Socket.io Real-Time Updates
+
+## Technology Stack
+Frontend
+React 18
+TypeScript
+Vite
+Tailwind CSS
+Framer Motion
+Backend
+Node.js
+Express.js
+TypeScript
+Database
+MongoDB
+Mongoose
+Authentication & Security
+JSON Web Tokens (JWT)
+OTP verification
+Role-based access control
+Database constraints
+Real-Time Communication
+Socket.io
+Data Visualization
+Recharts
+
+## User Roles
+## Student
+Students can:
+Authenticate and verify their identity
+View active elections
+Review candidates and manifestos
+Cast their vote
+Receive vote confirmation
+Monitor available election information
+Administrator
+
+## Administrators can:
+Manage voters
+Manage candidates
+Create elections
+Activate and close elections
+Monitor election activity
+View analytics
+Review audit logs
+
+## Project Structure
+VoxUnite/
 ├── client/
 │   ├── src/
-│   │   ├── pages/            # Route pages
-│   │   ├── components/       # Reusable components
-│   │   ├── contexts/         # Auth context
-│   │   └── lib/              # API & socket
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── contexts/
+│   │   └── lib/
 │   └── index.html
+│
+├── server/
+│   └── src/
+│       ├── models/
+│       ├── routes/
+│       ├── middleware/
+│       ├── services/
+│       ├── index.ts
+│       └── seed.ts
+│
 └── README.md
-```
 
-## 🔌 API Endpoints
+## Demo Environment
+The project includes seeded accounts and sample election data for
+local development and demonstration purposes.
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/admin/login` | — | Admin login |
-| POST | `/api/auth/request-otp` | — | Request student OTP |
-| POST | `/api/auth/verify-otp` | — | Verify OTP |
-| GET | `/api/elections` | — | List elections |
-| POST | `/api/elections` | Admin | Create election |
-| POST | `/api/elections/:id/activate` | Admin | Activate election |
-| POST | `/api/elections/:id/close` | Admin | Close election |
-| POST | `/api/voters/upload` | Admin | Import voter CSV/XLSX |
-| POST | `/api/candidates` | Admin | Add candidate |
-| POST | `/api/votes` | Student | Cast vote |
-| GET | `/api/results/:id` | — | Get results |
-| GET | `/api/analytics/dashboard` | Admin | Dashboard stats |
-| GET | `/api/analytics/audit-logs` | Admin | Audit logs |
+Important: Demo credentials are intended exclusively for the
+local/demo environment. Do not reuse these credentials in a
+production environment.
 
-## 🚢 Deployment
+## Demo Administrator
+Email: admin@university.edu
+Password: Admin@VoxUnite2024
 
-### Backend (Render/Railway)
-```bash
+The seed process also creates sample voters, candidates, faculties,
+and election data.
+
+## Getting Started
+Prerequisites
+Node.js 18+
+MongoDB running locally or a MongoDB Atlas connection
+npm
+1. Clone the repository
+git clone https://github.com/Haggla123/VoxUnite.git
+cd VoxUnite
+2. Install backend dependencies
 cd server
-npm run build
-npm start
-```
+npm install
+3. Install frontend dependencies
+cd ../client
+npm install --legacy-peer-deps
+4. Configure environment variables
 
-### Frontend (Vercel/Netlify)
-```bash
+## Create:
+server/.env
+
+## Configure the required environment variables for your local
+environment.
+Example:
+
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/voxunite
+JWT_SECRET=your_local_secret
+CORS_ORIGIN=http://localhost:5173
+
+For production deployments, use strong secrets and secure
+configuration management.
+
+Never commit .env files or real credentials to GitHub.
+
+5. Seed demo data
+cd server
+npm run seed
+6. Start the backend
+npm run dev
+7. Start the frontend
+
+Open another terminal:
+
 cd client
-npm run build
-# Deploy dist/ folder
-```
+npm run dev
 
-Set environment variables:
-- `VITE_API_URL` → Backend URL
-- `MONGODB_URI` → MongoDB Atlas connection string
-- `JWT_SECRET` → Strong secret key
+The application should then be available at:
+http://localhost:5173
 
-## 📄 License
+## API Overview
+Method	Endpoint	Access	Description
+POST	/api/admin/login	Public	Administrator login
+POST	/api/auth/request-otp	Public	Request student OTP
+POST	/api/auth/verify-otp	Public	Verify student OTP
+GET	/api/elections	Public	List elections
+POST	/api/elections	Admin	Create election
+POST	/api/elections/:id/activate	Admin	Activate election
+POST	/api/elections/:id/close	Admin	Close election
+POST	/api/voters/upload	Admin	Import voters
+POST	/api/candidates	Admin	Add candidate
+POST	/api/votes	Student	Cast vote
+GET	/api/results/:id	Public	Retrieve election results
+GET	/api/analytics/dashboard	Admin	Dashboard analytics
+GET	/api/analytics/audit-logs	Admin	Retrieve audit logs
 
-MIT License — Built for academic institutions.
+## Screenshots
+
+Screenshots demonstrating the voting interface, dashboards,
+authentication workflow, and election management will be added here.
+
+## Future Improvements
+
+Potential future improvements include:
+Formal security testing and penetration testing
+Stronger privacy-preserving ballot mechanisms
+Independent verification of election results
+Enhanced audit integrity
+More comprehensive automated testing
+Improved accessibility
+Expanded election analytics
+Stronger production deployment controls
+
+## Project Limitations
+
+VoxUnite is an academic software project and should not be treated as
+a production election infrastructure without further security
+analysis, testing, auditing, and independent review.
+
+Election security involves requirements that extend beyond
+application-level authentication and database controls.
+
+## Academic & Research Relevance
+
+VoxUnite provides a practical foundation for exploring topics
+including:
+Software security
+Authentication and authorization
+Privacy-preserving systems
+Secure database design
+Digital voting systems
+Access control
+Auditability
+
+## Security of web applications
+
+The project can also serve as a basis for further investigation into
+the relationship between claimed privacy properties and the
+information that may remain observable through system behaviour.
+
+## Author
+
+Haggla Mensah Agyei
+BSc Information Technology
+University of Energy and Natural Resources (UENR), Ghana
+
+GitHub: https://github.com/Haggla123
+Portfolio: https://haggla.vercel.app
+LinkedIn: https://www.linkedin.com/in/haggla
+Email: hagglaagyei@gmail.com
+
+
+## License
+
+MIT License
+
+### One important decision I made
+
+I **didn't call VoxUnite "enterprise-level" or "production-grade."** The current README does make those claims, but the safer academic presentation is to describe the mechanisms you implemented and explicitly acknowledge that a real election deployment would require independent security testing and further analysis. :contentReference[oaicite:2]{index=2}
+
+I also preserved the technical details currently documented in the repository—JWT, OTP, role-based access, layered double-vote prevention, audit logging, Socket.io, MongoDB, and the documented API structure. :contentReference[oaicite:3]{index=3}
+
+**Don't add anything else yet.** Replace the README with the block above, preview it, and tell me when it's done. Then we'll handle the screenshots and architecture diagram for VoxUnite.
