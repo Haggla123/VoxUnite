@@ -137,38 +137,7 @@ academic project.
 VoxUnite uses a client-server architecture consisting of a React
 frontend, Node.js/Express backend, and MongoDB database.
 
-
-┌─────────────────────────────────────────────────────┐
-│                     USERS                           │
-│                                                     │
-│       Students                  Administrators      │
-└──────────────────────┬──────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│                 REACT FRONTEND                      │
-│                                                     │
-│  Authentication │ Voting │ Elections │ Analytics    │
-└──────────────────────┬──────────────────────────────┘
-                       │
-                  REST API / HTTP
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│              NODE.JS / EXPRESS                      │
-│                                                     │
-│ Routes │ Middleware │ Services │ Validation         │
-│ Authentication │ Authorization │ Audit Logging      │
-└──────────────────────┬──────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│                    MONGODB                          │
-│                                                     │
-│ Users │ Elections │ Candidates │ Votes │ Audit Logs │
-└─────────────────────────────────────────────────────┘
-
-             Socket.io Real-Time Updates
+![VoxUnite Architecture](docs/architecture.png)
 
 ## Technology Stack
 Frontend
