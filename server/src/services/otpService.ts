@@ -1,0 +1,79 @@
+import { OtpSession } from '../models';
+
+const OTP_EXPIRY_MINUTES = parseInt(process.env.OTP_EXPIRY_MINUTES || '5', 10);
+const OTP_MAX_RETRIES = parseInt(process.env.OTP_MAX_RETRIES || '3', 10);
+
+export const generateOTP = (): string => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+export const createOtpSession = async (
+  studentId: string,
+  email: string
+): Promise<{ otp: string; sessionId: string }> => {
+  // Invalidate any existing OTPs for this student
+  await OtpSession.updateMany(
+    { studentId, email, isUsed: false },
+    { isUsed: true }
+  );
+
+  const otp = generateOTP();
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+  const session = await OtpSession.create({
+    studentId,
+    email,
+    otp,
+    expiresAt,
+    retryCount: 0,
+    isVerified: false,
+    isUsed: false,
+  });
+
+  return { otp, sessionId: session._id as string };
+};
+
+export const verifyOtp = async (
+  studentId: string,
+  email: string,
+  otp: string
+): Promise<{ valid: boolean; message: string }> => {
+  const session = await OtpSession.findOne({
+    studentId: studentId.toUpperCase(),
+    email: email.toLowerCase(),
+    isUsed: false,
+    isVerified: false,
+  }).sort({ createdAt: -1 });
+
+  if (!session) {
+    return { valid: false, message: 'No active OTP session found. Please request a new OTP.' };
+  }
+
+  if (new Date() > session.expiresAt) {
+    session.isUsed = true;
+    await session.save();
+    return { valid: false, message: 'OTP has expired. Please request a new one.' };
+  }
+
+  if (session.retryCount >= OTP_MAX_RETRIES) {
+    session.isUsed = true;
+    await session.save();
+    return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
+  }
+
+  if (session.otp !== otp) {
+    session.retryCount += 1;
+    await session.save();
+    return {
+      valid: false,
+      message: `Invalid OTP. ${OTP_MAX_RETRIES - session.retryCount} attempts remaining.`,
+    };
+  }
+
+  // Valid OTP
+  session.isVerified = true;
+  session.isUsed = true;
+  await session.save();
+
+  return { valid: true, message: 'OTP verified successfully' };
+};
