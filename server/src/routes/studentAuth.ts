@@ -1,7 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { EligibleVoter } from '../models';
 import { createOtpSession, verifyOtp } from '../services/otpService';
-import { generateStudentToken } from '../middleware/auth';
+import {
+  authenticateStudent,
+  clearAuthCookies,
+  generateStudentToken,
+  setAuthCookie,
+} from '../middleware/auth';
 import { createAuditLog } from '../services/auditService';
 
 const router = Router();
@@ -103,6 +108,8 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
 
     // Generate JWT token for student
     const token = generateStudentToken(voter);
+    clearAuthCookies(res);
+    setAuthCookie(res, 'student', token);
 
     await createAuditLog(
       'OTP_VERIFIED',
@@ -115,7 +122,6 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
 
     res.json({
       message: 'Authentication successful',
-      token,
       student: {
         id: voter._id,
         studentId: voter.studentId,
@@ -129,6 +135,41 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('OTP verification error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/auth/logout
+router.post('/logout', (_req: Request, res: Response) => {
+  clearAuthCookies(res);
+  res.json({ message: 'Logged out successfully' });
+});
+
+// GET /api/auth/me
+router.get('/me', authenticateStudent, async (req: Request, res: Response) => {
+  try {
+    const voter = await EligibleVoter.findOne({
+      studentId: req.studentVoter.studentId,
+      email: req.studentVoter.email,
+      isActive: true,
+    });
+
+    if (!voter) {
+      res.status(404).json({ message: 'Voter record not found' });
+      return;
+    }
+
+    res.json({
+      id: voter._id,
+      studentId: voter.studentId,
+      fullName: voter.fullName,
+      email: voter.email,
+      faculty: voter.faculty,
+      department: voter.department,
+      hasVoted: voter.hasVoted,
+      votedElectionIds: voter.votedElectionIds,
+    });
+  } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 });

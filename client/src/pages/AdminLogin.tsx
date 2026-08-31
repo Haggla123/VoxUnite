@@ -18,7 +18,7 @@ const AdminLogin: React.FC = () => {
     setLoading(true); setError('');
     try {
       const { data } = await adminLogin(email, password);
-      loginAdmin(data.token, data.admin);
+      loginAdmin(data.admin);
       navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');

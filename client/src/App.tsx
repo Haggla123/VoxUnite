@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
-import { AdminRoute, StudentRoute } from './components/auth/ProtectedRoute';
+import { AdminRoute, AuthenticatedRoute, StudentRoute } from './components/auth/ProtectedRoute';
 import Navbar from './components/layout/Navbar';
 
 // Pages
@@ -43,7 +43,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<StudentLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/live" element={<LiveMonitor />} />
+            <Route path="/live" element={<AuthenticatedRoute><LiveMonitor /></AuthenticatedRoute>} />
             <Route path="/results/:id" element={<ResultsPage />} />
 
             {/* Student Protected */}

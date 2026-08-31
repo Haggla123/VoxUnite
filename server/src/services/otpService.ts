@@ -1,10 +1,13 @@
+import bcrypt from 'bcryptjs';
+import { randomInt } from 'crypto';
 import { OtpSession } from '../models';
 
 const OTP_EXPIRY_MINUTES = parseInt(process.env.OTP_EXPIRY_MINUTES || '5', 10);
 const OTP_MAX_RETRIES = parseInt(process.env.OTP_MAX_RETRIES || '3', 10);
+const OTP_SALT_ROUNDS = parseInt(process.env.OTP_SALT_ROUNDS || '10', 10);
 
 export const generateOTP = (): string => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(100000, 1000000).toString();
 };
 
 export const createOtpSession = async (
@@ -18,19 +21,20 @@ export const createOtpSession = async (
   );
 
   const otp = generateOTP();
+  const otpHash = await bcrypt.hash(otp, OTP_SALT_ROUNDS);
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
   const session = await OtpSession.create({
     studentId,
     email,
-    otp,
+    otp: otpHash,
     expiresAt,
     retryCount: 0,
     isVerified: false,
     isUsed: false,
   });
 
-  return { otp, sessionId: session._id as string };
+  return { otp, sessionId: session._id.toString() };
 };
 
 export const verifyOtp = async (
@@ -43,7 +47,7 @@ export const verifyOtp = async (
     email: email.toLowerCase(),
     isUsed: false,
     isVerified: false,
-  }).sort({ createdAt: -1 });
+  }).select('+otp').sort({ createdAt: -1 });
 
   if (!session) {
     return { valid: false, message: 'No active OTP session found. Please request a new OTP.' };
@@ -61,7 +65,8 @@ export const verifyOtp = async (
     return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
   }
 
-  if (session.otp !== otp) {
+  const otpMatches = await bcrypt.compare(otp, session.otp);
+  if (!otpMatches) {
     session.retryCount += 1;
     await session.save();
     return {

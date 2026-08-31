@@ -1,6 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { Admin } from '../models';
-import { authenticateAdmin, generateAdminToken } from '../middleware/auth';
+import {
+  authenticateAdmin,
+  clearAuthCookies,
+  generateAdminToken,
+  setAuthCookie,
+} from '../middleware/auth';
 import { createAuditLog } from '../services/auditService';
 
 const router = Router();
@@ -36,6 +41,8 @@ router.post('/login', async (req: Request, res: Response) => {
     await admin.save();
 
     const token = generateAdminToken(admin);
+    clearAuthCookies(res);
+    setAuthCookie(res, 'admin', token);
 
     await createAuditLog(
       'ADMIN_LOGIN',
@@ -47,7 +54,6 @@ router.post('/login', async (req: Request, res: Response) => {
     );
 
     res.json({
-      token,
       admin: {
         id: admin._id,
         email: admin.email,
@@ -59,6 +65,12 @@ router.post('/login', async (req: Request, res: Response) => {
     console.error('Admin login error:', error);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+// POST /api/admin/logout
+router.post('/logout', (_req: Request, res: Response) => {
+  clearAuthCookies(res);
+  res.json({ message: 'Logged out successfully' });
 });
 
 // GET /api/admin/me

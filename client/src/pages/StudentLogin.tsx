@@ -35,7 +35,7 @@ const StudentLogin: React.FC = () => {
     setLoading(true); setError('');
     try {
       const { data } = await verifyOtp(studentId, email, otp);
-      loginStudent(data.token, data.student);
+      loginStudent(data.student);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'OTP verification failed');

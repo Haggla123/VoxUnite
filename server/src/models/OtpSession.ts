@@ -28,6 +28,7 @@ const OtpSessionSchema = new Schema<IOtpSession>(
     otp: {
       type: String,
       required: true,
+      select: false,
     },
     expiresAt: {
       type: Date,

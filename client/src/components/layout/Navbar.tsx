@@ -59,9 +59,6 @@ const Navbar: React.FC = () => {
                 <>
                   <Link to="/" className={navLinkClass('/')}>Home</Link>
                   <Link to="/login" className={navLinkClass('/login')}>Student Login</Link>
-                  <Link to="/live" className={navLinkClass('/live')}>
-                    <span className="live-dot" /> Live
-                  </Link>
                   <Link
                     to="/admin/login"
                     className="ml-2 px-5 py-2 text-sm font-medium bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white rounded-xl transition-all flex items-center gap-1.5 shadow-lg shadow-primary-600/20 hover:shadow-primary-500/30"
@@ -137,7 +134,6 @@ const Navbar: React.FC = () => {
                   <>
                     <Link to="/" onClick={() => setMobileOpen(false)} className="block px-4 py-3 text-surface-200 hover:text-white rounded-xl hover:bg-white/5 transition-all">Home</Link>
                     <Link to="/login" onClick={() => setMobileOpen(false)} className="block px-4 py-3 text-surface-200 hover:text-white rounded-xl hover:bg-white/5 transition-all">Student Login</Link>
-                    <Link to="/live" onClick={() => setMobileOpen(false)} className="block px-4 py-3 text-surface-200 hover:text-white rounded-xl hover:bg-white/5 transition-all flex items-center gap-2"><span className="live-dot" /> Live Monitor</Link>
                     <Link to="/admin/login" onClick={() => setMobileOpen(false)} className="block px-4 py-3 text-primary-400 hover:text-primary-300 rounded-xl hover:bg-primary-500/10 transition-all flex items-center gap-2"><Shield className="w-4 h-4" /> Admin Login</Link>
                   </>
                 )}

@@ -47,7 +47,10 @@ const LiveMonitor: React.FC = () => {
   }, [selectedElection]);
 
   useEffect(() => {
+    if (!selectedElection) return;
+
     const socket = getSocket();
+    socket.emit('join:election', selectedElection._id);
     socket.on('vote:cast', (data: any) => {
       const event: ActivityEvent = {
         message: `A student from ${data.faculty} just voted`,
@@ -59,7 +62,10 @@ const LiveMonitor: React.FC = () => {
         getResults(selectedElection._id).then(({ data }) => setResults(data)).catch(() => {});
       }
     });
-    return () => { socket.off('vote:cast'); };
+    return () => {
+      socket.emit('leave:election', selectedElection._id);
+      socket.off('vote:cast');
+    };
   }, [selectedElection]);
 
   const getCountdown = (endDate: string) => {

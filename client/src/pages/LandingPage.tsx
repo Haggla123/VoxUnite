@@ -48,7 +48,7 @@ const LandingPage: React.FC = () => {
             <motion.div {...fadeUp}>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/8 border border-primary-500/15 text-primary-300 text-sm mb-8 backdrop-blur-sm">
                 <Sparkles className="w-4 h-4" />
-                <span className="font-medium">Secure Campus Democracy</span>
+                <span className="font-medium">Campus Election Platform</span>
               </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-[1.05] mb-6 tracking-tight">
@@ -58,7 +58,7 @@ const LandingPage: React.FC = () => {
               </h1>
 
               <p className="text-lg text-surface-400 mb-10 max-w-lg leading-relaxed">
-                VoxUnite is the secure, transparent digital voting platform built for
+                VoxUnite is a digital voting platform built for
                 university elections. Every vote counts, every voice matters.
               </p>
 
@@ -71,7 +71,7 @@ const LandingPage: React.FC = () => {
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  to="/live"
+                  to="/login"
                   className="btn-secondary px-8 py-4 rounded-2xl"
                 >
                   <span className="live-dot" /> Live Monitor
@@ -202,7 +202,7 @@ const LandingPage: React.FC = () => {
               Built for <span className="gradient-text">Trust</span>
             </h2>
             <p className="text-surface-400 max-w-2xl mx-auto text-lg leading-relaxed">
-              Enterprise-grade security meets elegant simplicity. Every feature is designed
+              Practical safeguards meet elegant simplicity. Every feature is designed
               to ensure fair, transparent elections.
             </p>
           </motion.div>
@@ -215,12 +215,12 @@ const LandingPage: React.FC = () => {
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {[
-              { icon: Lock, title: 'End-to-End Security', desc: 'OTP verification, JWT authentication, and immutable vote records ensure complete election integrity.' },
+              { icon: Lock, title: 'Session Protection', desc: 'OTP verification, cookie-based JWT sessions, and duplicate-vote checks help protect election workflows.' },
               { icon: Shield, title: 'Double-Vote Prevention', desc: 'Triple-layer protection at session, backend, and database levels prevents any duplicate voting attempts.' },
               { icon: Eye, title: 'Full Transparency', desc: 'Comprehensive audit logs, real-time monitoring, and verifiable results you can trust.' },
               { icon: Users, title: 'Institutional Integration', desc: 'CSV/XLSX voter import from your university registry. No student registration required.' },
               { icon: BarChart3, title: 'Live Analytics', desc: 'Real-time turnout tracking, faculty participation, and broadcast-quality result dashboards.' },
-              { icon: CheckCircle, title: 'Vote Anonymity', desc: 'Votes are permanently anonymous. No one can trace a ballot back to a student.' },
+              { icon: CheckCircle, title: 'Vote Controls', desc: 'Eligibility checks and vote history help prevent repeat submissions for the same election.' },
             ].map((feature) => (
               <motion.div
                 key={feature.title}
@@ -252,7 +252,7 @@ const LandingPage: React.FC = () => {
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-5 tracking-tight">
               How <span className="gradient-text">Voting</span> Works
             </h2>
-            <p className="text-surface-400 text-lg">Simple, secure, and completed in under 2 minutes.</p>
+            <p className="text-surface-400 text-lg">Simple, guided, and completed in under 2 minutes.</p>
           </motion.div>
 
           <motion.div
@@ -266,7 +266,7 @@ const LandingPage: React.FC = () => {
               { step: '01', title: 'Verify Identity', desc: 'Enter your Student ID and institutional email.' },
               { step: '02', title: 'Receive OTP', desc: 'A one-time password is sent to your email for verification.' },
               { step: '03', title: 'Cast Your Vote', desc: 'Browse candidates, read manifestos, and make your selections.' },
-              { step: '04', title: 'Confirmed', desc: 'Your vote is securely recorded. View your confirmation receipt.' },
+              { step: '04', title: 'Confirmed', desc: 'Your vote is recorded. View your confirmation receipt.' },
             ].map((s) => (
               <motion.div key={s.step} variants={staggerItem} className="relative text-center group">
                 <div className="text-7xl font-display font-bold text-primary-500/[0.07] mb-3 group-hover:text-primary-500/[0.12] transition-colors duration-500">
@@ -297,7 +297,7 @@ const LandingPage: React.FC = () => {
                 </h2>
                 <p className="text-surface-300 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
                   Your voice shapes the future of your university. Make it count with
-                  VoxUnite's secure voting platform.
+                  VoxUnite's voting platform.
                 </p>
                 <Link
                   to="/login"
@@ -321,7 +321,7 @@ const LandingPage: React.FC = () => {
               </div>
               <span className="font-display font-bold text-white">VoxUnite</span>
             </div>
-            <p className="text-surface-500 text-sm">© 2024 VoxUnite. Secure Campus Democracy Platform.</p>
+            <p className="text-surface-500 text-sm">© 2024 VoxUnite. Campus Voting Platform.</p>
             <div className="flex items-center gap-2 text-surface-500 text-sm">
               <Lock className="w-4 h-4" /> 256-bit Encrypted
             </div>

@@ -21,7 +21,7 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
     if (!eligibleVoter) { res.status(403).json({ message: 'You are not eligible to vote' }); return; }
 
     // 3. Check if already voted (triple check)
-    if (eligibleVoter.votedElectionIds.includes(electionId)) {
+    if (eligibleVoter.votedElectionIds.some((id) => id.toString() === electionId)) {
       res.status(409).json({ message: 'You have already voted in this election' }); return;
     }
     const existingVote = await Vote.findOne({ electionId, voterId: eligibleVoter._id });
@@ -57,7 +57,7 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
 
     // 7. Update voter record
     eligibleVoter.hasVoted = true;
-    eligibleVoter.votedElectionIds.push(electionId);
+    eligibleVoter.votedElectionIds.push(election._id);
     await eligibleVoter.save();
 
     // 8. Update election vote count
@@ -70,7 +70,7 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
     const io = req.app.get('io');
     if (io) {
       const updatedElection = await Election.findById(electionId);
-      io.emit('vote:cast', {
+      io.to(`election:${electionId}`).emit('vote:cast', {
         electionId,
         totalVotesCast: updatedElection?.totalVotesCast || 0,
         faculty: voter.faculty,
@@ -92,7 +92,7 @@ router.get('/check/:electionId', authenticateStudent, async (req: Request, res: 
   try {
     const voter = req.studentVoter;
     const eligibleVoter = await EligibleVoter.findOne({ studentId: voter.studentId });
-    const hasVoted = eligibleVoter?.votedElectionIds.includes(req.params.electionId) || false;
+    const hasVoted = eligibleVoter?.votedElectionIds.some((id) => id.toString() === req.params.electionId) || false;
     res.json({ hasVoted });
   } catch (error) { res.status(500).json({ message: 'Server error' }); }
 });
