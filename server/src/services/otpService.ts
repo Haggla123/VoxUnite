@@ -1,7 +1,9 @@
 import { OtpSession } from '../models';
+import bcrypt from 'bcryptjs';
 
 const OTP_EXPIRY_MINUTES = parseInt(process.env.OTP_EXPIRY_MINUTES || '5', 10);
 const OTP_MAX_RETRIES = parseInt(process.env.OTP_MAX_RETRIES || '3', 10);
+const OTP_SALT_ROUNDS = parseInt(process.env.OTP_SALT_ROUNDS || '10', 10);
 
 export const generateOTP = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -17,7 +19,8 @@ export const createOtpSession = async (
     { isUsed: true }
   );
 
-  const otp = generateOTP();
+  const otp = generateOTP(); 
+  const otpHash = await bcrypt.hash(otp, OTP_SALT_ROUNDS);
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
   const session = await OtpSession.create({
@@ -61,7 +64,8 @@ export const verifyOtp = async (
     return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
   }
 
-  if (session.otp !== otp) {
+  const otpMatches = await bcrypt.compare(otp, session.otp);  
+  if (!otpMatches) {
     session.retryCount += 1;
     await session.save();
     return {
