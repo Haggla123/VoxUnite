@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { Election, Candidate, Vote, EligibleVoter } from '../models';
 import { authenticateAdmin } from '../middleware/auth';
 import { createAuditLog } from '../services/auditService';
@@ -7,7 +7,7 @@ import { uploadBanner } from '../middleware/upload';
 const router = Router();
 
 // GET /api/elections - List all elections
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { status, faculty } = req.query;
     const filter: any = {};
@@ -19,13 +19,11 @@ router.get('/', async (req: Request, res: Response) => {
       .populate('createdBy', 'fullName email');
 
     res.json(elections);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // GET /api/elections/:id
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const election = await Election.findById(req.params.id)
       .populate('createdBy', 'fullName email');
@@ -36,13 +34,11 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 
     res.json(election);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/elections - Create election (admin only)
-router.post('/', authenticateAdmin, async (req: Request, res: Response) => {
+router.post('/', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {
       title,
@@ -83,14 +79,11 @@ router.post('/', authenticateAdmin, async (req: Request, res: Response) => {
     );
 
     res.status(201).json(election);
-  } catch (error) {
-    console.error('Create election error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // PUT /api/elections/:id - Update election (admin only)
-router.put('/:id', authenticateAdmin, async (req: Request, res: Response) => {
+router.put('/:id', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const election = await Election.findById(req.params.id);
     if (!election) {
@@ -129,13 +122,11 @@ router.put('/:id', authenticateAdmin, async (req: Request, res: Response) => {
     );
 
     res.json(updated);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/elections/:id/activate
-router.post('/:id/activate', authenticateAdmin, async (req: Request, res: Response) => {
+router.post('/:id/activate', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const election = await Election.findById(req.params.id);
     if (!election) {
@@ -175,13 +166,11 @@ router.post('/:id/activate', authenticateAdmin, async (req: Request, res: Respon
     }
 
     res.json({ message: 'Election activated', election });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/elections/:id/close
-router.post('/:id/close', authenticateAdmin, async (req: Request, res: Response) => {
+router.post('/:id/close', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const election = await Election.findById(req.params.id);
     if (!election) {
@@ -213,13 +202,11 @@ router.post('/:id/close', authenticateAdmin, async (req: Request, res: Response)
     }
 
     res.json({ message: 'Election closed', election });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // PUT /api/elections/:id/results-mode
-router.put('/:id/results-mode', authenticateAdmin, async (req: Request, res: Response) => {
+router.put('/:id/results-mode', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { mode } = req.body;
     if (!['safe', 'live'].includes(mode)) {
@@ -253,9 +240,7 @@ router.put('/:id/results-mode', authenticateAdmin, async (req: Request, res: Res
     }
 
     res.json({ message: `Results mode set to ${mode}`, election });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/elections/:id/banner
@@ -263,7 +248,7 @@ router.post(
   '/:id/banner',
   authenticateAdmin,
   uploadBanner.single('banner'),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.file) {
         res.status(400).json({ message: 'Banner image is required' });
@@ -277,10 +262,10 @@ router.post(
       );
 
       res.json({ message: 'Banner uploaded', election });
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
-    }
+    } catch (error) { next(error); }
   }
 );
 
 export default router;
+
+

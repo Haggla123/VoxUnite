@@ -44,14 +44,14 @@ const AdminElections: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface-950 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface-50 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="page-wrapper bg-surface-950">
+    <div className="page-wrapper bg-surface-50">
       <div className="page-container">
         <div className="flex items-center justify-between page-header">
           <h1 className="page-title text-3xl">Election <span className="gradient-text">Vault</span></h1>
@@ -70,40 +70,40 @@ const AdminElections: React.FC = () => {
             animate={{ opacity: 1, height: 'auto' }}
             className="mb-8 card p-6 overflow-hidden"
           >
-            <h2 className="text-lg font-semibold text-white mb-5">Create Election</h2>
+            <h2 className="text-lg font-semibold text-surface-900 mb-5">Create Election</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-surface-300 mb-1.5 font-medium">Title</label>
-                  <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
+                  <label className="block text-sm text-surface-700 mb-1.5 font-medium">Title</label>
+                  <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required className="w-full px-4 py-3 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
                 </div>
                 <div>
-                  <label className="block text-sm text-surface-300 mb-1.5 font-medium">Faculty Scope</label>
-                  <input type="text" value={form.facultyScope} onChange={e => setForm(f => ({ ...f, facultyScope: e.target.value }))} className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
+                  <label className="block text-sm text-surface-700 mb-1.5 font-medium">Faculty Scope</label>
+                  <input type="text" value={form.facultyScope} onChange={e => setForm(f => ({ ...f, facultyScope: e.target.value }))} className="w-full px-4 py-3 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-surface-300 mb-1.5 font-medium">Description</label>
-                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} required rows={2} className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all resize-none" />
+                <label className="block text-sm text-surface-700 mb-1.5 font-medium">Description</label>
+                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} required rows={2} className="w-full px-4 py-3 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all resize-none" />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-surface-300 mb-1.5 font-medium">Start Date</label>
-                  <input type="datetime-local" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} required className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
+                  <label className="block text-sm text-surface-700 mb-1.5 font-medium">Start Date</label>
+                  <input type="datetime-local" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} required className="w-full px-4 py-3 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
                 </div>
                 <div>
-                  <label className="block text-sm text-surface-300 mb-1.5 font-medium">End Date</label>
-                  <input type="datetime-local" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} required className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
+                  <label className="block text-sm text-surface-700 mb-1.5 font-medium">End Date</label>
+                  <input type="datetime-local" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} required className="w-full px-4 py-3 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30 transition-all" />
                 </div>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm text-surface-300 font-medium">Positions</label>
-                  <button type="button" onClick={addPosition} className="text-xs text-primary-400 hover:text-primary-300 font-medium transition-colors">+ Add Position</button>
+                  <label className="text-sm text-surface-700 font-medium">Positions</label>
+                  <button type="button" onClick={addPosition} className="text-xs text-primary-600 hover:text-primary-700 font-medium transition-colors">+ Add Position</button>
                 </div>
                 <div className="space-y-2">
                   {form.positions.map((p, i) => (
-                    <input key={i} type="text" value={p.title} onChange={e => updatePosition(i, 'title', e.target.value)} placeholder="Position title" className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-primary-500 transition-all" />
+                    <input key={i} type="text" value={p.title} onChange={e => updatePosition(i, 'title', e.target.value)} placeholder="Position title" className="w-full px-4 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 text-sm focus:outline-none focus:border-primary-500 transition-all" />
                   ))}
                 </div>
               </div>
@@ -123,15 +123,15 @@ const AdminElections: React.FC = () => {
           className="space-y-4"
         >
           {elections.map((el) => (
-            <motion.div key={el._id} variants={staggerItem} className="card p-6 hover:border-white/10">
+            <motion.div key={el._id} variants={staggerItem} className="card p-6 hover:border-surface-300">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-white truncate">{el.title}</h3>
+                    <h3 className="text-lg font-semibold text-surface-900 truncate">{el.title}</h3>
                     <span className={`badge badge-${el.status} shrink-0`}>{el.status}</span>
                   </div>
-                  <p className="text-sm text-surface-400 line-clamp-1">{el.description}</p>
-                  <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-surface-500">
+                  <p className="text-sm text-surface-500 line-clamp-1">{el.description}</p>
+                  <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-surface-400">
                     <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(el.startDate).toLocaleDateString()} - {new Date(el.endDate).toLocaleDateString()}</span>
                     <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {el.totalVotesCast}/{el.totalEligibleVoters} votes</span>
                     <span className="flex items-center gap-1.5"><Vote className="w-3.5 h-3.5" /> {el.positions?.length || 0} positions</span>
@@ -148,7 +148,7 @@ const AdminElections: React.FC = () => {
                       <Square className="w-4 h-4" /> Close
                     </button>
                   )}
-                  <Link to={`/admin/elections/${el._id}`} className="flex items-center gap-1.5 px-4 py-2 bg-white/[0.04] hover:bg-white/[0.08] text-white rounded-xl text-sm border border-white/[0.08] transition-all font-medium">
+                  <Link to={`/admin/elections/${el._id}`} className="flex items-center gap-1.5 px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-sm border border-surface-200 transition-all font-medium">
                     <Settings className="w-4 h-4" /> Manage
                   </Link>
                 </div>

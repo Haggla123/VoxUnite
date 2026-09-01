@@ -1,12 +1,17 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { Admin } from '../models';
-import { authenticateAdmin, generateAdminToken } from '../middleware/auth';
+import {
+  authenticateAdmin,
+  clearAuthCookies,
+  generateAdminToken,
+  setAuthCookie,
+} from '../middleware/auth';
 import { createAuditLog } from '../services/auditService';
 
 const router = Router();
 
 // POST /api/admin/login
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
 
@@ -36,6 +41,8 @@ router.post('/login', async (req: Request, res: Response) => {
     await admin.save();
 
     const token = generateAdminToken(admin);
+    clearAuthCookies(res);
+    setAuthCookie(res, 'admin', token);
 
     await createAuditLog(
       'ADMIN_LOGIN',
@@ -47,7 +54,6 @@ router.post('/login', async (req: Request, res: Response) => {
     );
 
     res.json({
-      token,
       admin: {
         id: admin._id,
         email: admin.email,
@@ -55,14 +61,17 @@ router.post('/login', async (req: Request, res: Response) => {
         role: admin.role,
       },
     });
-  } catch (error) {
-    console.error('Admin login error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
+});
+
+// POST /api/admin/logout
+router.post('/logout', (_req: Request, res: Response) => {
+  clearAuthCookies(res);
+  res.json({ message: 'Logged out successfully' });
 });
 
 // GET /api/admin/me
-router.get('/me', authenticateAdmin, async (req: Request, res: Response) => {
+router.get('/me', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const admin = req.user;
     res.json({
@@ -72,13 +81,11 @@ router.get('/me', authenticateAdmin, async (req: Request, res: Response) => {
       role: admin.role,
       lastLogin: admin.lastLogin,
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/admin/register (only super_admin can create admins)
-router.post('/register', authenticateAdmin, async (req: Request, res: Response) => {
+router.post('/register', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.user.role !== 'super_admin') {
       res.status(403).json({ message: 'Only super admins can create admin accounts' });
@@ -106,9 +113,9 @@ router.post('/register', authenticateAdmin, async (req: Request, res: Response) 
       fullName: admin.fullName,
       role: admin.role,
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 export default router;
+
+

@@ -1,11 +1,11 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { Election, Candidate, Vote, EligibleVoter } from '../models';
 import { authenticateAdmin } from '../middleware/auth';
 
 const router = Router();
 
 // GET /api/results/:electionId
-router.get('/:electionId', async (req: Request, res: Response) => {
+router.get('/:electionId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const election = await Election.findById(req.params.electionId);
     if (!election) { res.status(404).json({ message: 'Election not found' }); return; }
@@ -36,7 +36,9 @@ router.get('/:electionId', async (req: Request, res: Response) => {
     } else {
       res.json({ election: { id: election._id, title: election.title, status: election.status, resultsVisibility: election.resultsVisibility }, turnout, facultyTurnout, showResults: false });
     }
-  } catch (error) { res.status(500).json({ message: 'Server error' }); }
+  } catch (error) { next(error); }
 });
 
 export default router;
+
+

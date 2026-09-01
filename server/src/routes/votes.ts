@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import { Vote, Election, Candidate, EligibleVoter } from '../models';
 import { authenticateStudent } from '../middleware/auth';
 import { createAuditLog } from '../services/auditService';
@@ -6,10 +7,15 @@ import { createAuditLog } from '../services/auditService';
 const router = Router();
 
 // POST /api/votes - Cast a vote
-router.post('/', authenticateStudent, async (req: Request, res: Response) => {
+router.post('/', authenticateStudent, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { electionId, selections } = req.body;
     const voter = req.studentVoter;
+
+    if (!mongoose.Types.ObjectId.isValid(electionId)) {
+      res.status(400).json({ message: 'Invalid election ID' });
+      return;
+    }
 
     // 1. Verify election is active
     const election = await Election.findById(electionId);
@@ -21,7 +27,7 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
     if (!eligibleVoter) { res.status(403).json({ message: 'You are not eligible to vote' }); return; }
 
     // 3. Check if already voted (triple check)
-    if (eligibleVoter.votedElectionIds.includes(electionId)) {
+    if (eligibleVoter.votedElectionIds.some((id) => id.toString() === electionId)) {
       res.status(409).json({ message: 'You have already voted in this election' }); return;
     }
     const existingVote = await Vote.findOne({ electionId, voterId: eligibleVoter._id });
@@ -30,6 +36,31 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
     // 4. Validate selections
     if (!selections || !Array.isArray(selections) || selections.length === 0) {
       res.status(400).json({ message: 'At least one selection is required' }); return;
+    }
+
+    const expectedPositions = election.positions.map((position) => position.title);
+    if (expectedPositions.length === 0) {
+      res.status(400).json({ message: 'This election has no configured positions' }); return;
+    }
+
+    if (selections.length !== expectedPositions.length) {
+      res.status(400).json({ message: 'Please select one candidate for every position' }); return;
+    }
+    
+    // Check for unknown or duplicate positions
+    const allowedPositions = new Set(expectedPositions);
+    const positionsVoted = new Set<string>();
+    for (const sel of selections) {
+      if (!sel?.position || !allowedPositions.has(sel.position)) {
+        res.status(400).json({ message: `Invalid ballot position: ${sel?.position || 'unknown'}` }); return;
+      }
+      if (!mongoose.Types.ObjectId.isValid(sel.candidateId)) {
+        res.status(400).json({ message: `Invalid candidate for position: ${sel.position}` }); return;
+      }
+      if (positionsVoted.has(sel.position)) {
+        res.status(400).json({ message: `You can only select one candidate for position: ${sel.position}` }); return;
+      }
+      positionsVoted.add(sel.position);
     }
 
     // Verify all candidates exist and belong to this election
@@ -57,7 +88,7 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
 
     // 7. Update voter record
     eligibleVoter.hasVoted = true;
-    eligibleVoter.votedElectionIds.push(electionId);
+    eligibleVoter.votedElectionIds.push(election._id);
     await eligibleVoter.save();
 
     // 8. Update election vote count
@@ -70,7 +101,7 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
     const io = req.app.get('io');
     if (io) {
       const updatedElection = await Election.findById(electionId);
-      io.emit('vote:cast', {
+      io.to(`election:${electionId}`).emit('vote:cast', {
         electionId,
         totalVotesCast: updatedElection?.totalVotesCast || 0,
         faculty: voter.faculty,
@@ -80,21 +111,19 @@ router.post('/', authenticateStudent, async (req: Request, res: Response) => {
     }
 
     res.status(201).json({ message: 'Vote recorded successfully', voteId: vote._id });
-  } catch (error: any) {
-    if (error.code === 11000) { res.status(409).json({ message: 'Duplicate vote prevented' }); return; }
-    console.error('Vote error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // GET /api/votes/check/:electionId
-router.get('/check/:electionId', authenticateStudent, async (req: Request, res: Response) => {
+router.get('/check/:electionId', authenticateStudent, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const voter = req.studentVoter;
     const eligibleVoter = await EligibleVoter.findOne({ studentId: voter.studentId });
-    const hasVoted = eligibleVoter?.votedElectionIds.includes(req.params.electionId) || false;
+    const hasVoted = eligibleVoter?.votedElectionIds.some((id) => id.toString() === req.params.electionId) || false;
     res.json({ hasVoted });
-  } catch (error) { res.status(500).json({ message: 'Server error' }); }
+  } catch (error) { next(error); }
 });
 
 export default router;
+
+

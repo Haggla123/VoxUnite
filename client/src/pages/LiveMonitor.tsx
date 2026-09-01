@@ -47,7 +47,10 @@ const LiveMonitor: React.FC = () => {
   }, [selectedElection]);
 
   useEffect(() => {
+    if (!selectedElection) return;
+
     const socket = getSocket();
+    socket.emit('join:election', selectedElection._id);
     socket.on('vote:cast', (data: any) => {
       const event: ActivityEvent = {
         message: `A student from ${data.faculty} just voted`,
@@ -59,7 +62,10 @@ const LiveMonitor: React.FC = () => {
         getResults(selectedElection._id).then(({ data }) => setResults(data)).catch(() => {});
       }
     });
-    return () => { socket.off('vote:cast'); };
+    return () => {
+      socket.emit('leave:election', selectedElection._id);
+      socket.off('vote:cast');
+    };
   }, [selectedElection]);
 
   const getCountdown = (endDate: string) => {
@@ -75,20 +81,20 @@ const LiveMonitor: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen animated-gradient flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface-50 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (elections.length === 0) {
     return (
-      <div className="min-h-screen bg-surface-950 flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-surface-50 flex items-center justify-center pt-20">
         <div className="text-center">
-          <div className="w-20 h-20 rounded-2xl bg-surface-800/50 flex items-center justify-center mx-auto mb-5">
-            <Radio className="w-10 h-10 text-surface-700" />
+          <div className="w-20 h-20 rounded-xl bg-surface-100 flex items-center justify-center mx-auto mb-5">
+            <Radio className="w-10 h-10 text-surface-500" />
           </div>
-          <h2 className="text-xl font-semibold text-surface-400">No Active Elections</h2>
+          <h2 className="text-xl font-semibold text-surface-900">No Active Elections</h2>
           <p className="text-surface-500 mt-2">The live monitor activates when an election is running.</p>
         </div>
       </div>
@@ -100,19 +106,19 @@ const LiveMonitor: React.FC = () => {
   const facultyTurnout = results?.facultyTurnout || [];
 
   return (
-    <div className="min-h-screen bg-surface-950">
+    <div className="min-h-[calc(100vh-4rem)] bg-surface-50">
       {/* Live Header Bar */}
       <div className="navbar-solid sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/15">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-50 border border-red-100">
               <span className="live-dot" />
-              <span className="text-red-400 text-sm font-bold tracking-wider">LIVE</span>
+              <span className="text-red-600 text-sm font-bold tracking-wider">LIVE</span>
             </div>
-            <h1 className="text-base font-display font-bold text-white hidden md:block">{selectedElection?.title}</h1>
+            <h1 className="text-base font-display font-bold text-surface-900 hidden md:block">{selectedElection?.title}</h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-surface-400 text-sm flex items-center gap-1.5 font-mono">
+            <div className="text-surface-500 text-sm flex items-center gap-1.5 font-mono">
               <Clock className="w-4 h-4" /> {now.toLocaleTimeString()}
             </div>
             {results?.election?.resultsVisibility === 'live' && (
@@ -134,8 +140,8 @@ const LiveMonitor: React.FC = () => {
                 { val: countdown.s, label: 'Seconds' },
               ].map(t => (
                 <div key={t.label} className="text-center">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 glass rounded-2xl flex items-center justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-display font-bold text-white">{String(t.val).padStart(2, '0')}</span>
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-surface-200 rounded-xl flex items-center justify-center mb-2">
+                    <span className="text-3xl sm:text-4xl font-display font-bold text-surface-900">{String(t.val).padStart(2, '0')}</span>
                   </div>
                   <span className="text-[0.65rem] text-surface-500 uppercase tracking-widest font-semibold">{t.label}</span>
                 </div>
@@ -147,10 +153,10 @@ const LiveMonitor: React.FC = () => {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total Votes', value: turnout?.totalVotes || 0, icon: Vote, color: 'text-primary-400' },
-            { label: 'Participation', value: `${turnout?.participationRate || 0}%`, icon: TrendingUp, color: 'text-accent-400' },
-            { label: 'Eligible Voters', value: turnout?.totalEligible || 0, icon: Users, color: 'text-blue-400' },
-            { label: 'Yet to Vote', value: (turnout?.totalEligible || 0) - (turnout?.totalVotes || 0), icon: Activity, color: 'text-amber-400' },
+            { label: 'Total Votes', value: turnout?.totalVotes || 0, icon: Vote, color: 'text-primary-600' },
+            { label: 'Participation', value: `${turnout?.participationRate || 0}%`, icon: TrendingUp, color: 'text-accent-600' },
+            { label: 'Eligible Voters', value: turnout?.totalEligible || 0, icon: Users, color: 'text-primary-600' },
+            { label: 'Yet to Vote', value: (turnout?.totalEligible || 0) - (turnout?.totalVotes || 0), icon: Activity, color: 'text-amber-600' },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -160,7 +166,7 @@ const LiveMonitor: React.FC = () => {
               className="stat-card card p-5"
             >
               <s.icon className={`w-6 h-6 ${s.color} mb-3`} />
-              <p className="text-2xl md:text-3xl font-display font-bold text-white">{s.value}</p>
+              <p className="text-2xl md:text-3xl font-display font-bold text-surface-900">{s.value}</p>
               <p className="text-xs text-surface-500 mt-1 font-medium">{s.label}</p>
             </motion.div>
           ))}
@@ -169,27 +175,27 @@ const LiveMonitor: React.FC = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Faculty Turnout Chart */}
           <div className="lg:col-span-2 card p-6">
-            <h2 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-primary-400" /> Faculty Turnout
+            <h2 className="text-lg font-semibold text-surface-900 mb-5 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-primary-600" /> Faculty Turnout
             </h2>
             {facultyTurnout.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={facultyTurnout.map((f: any) => ({ name: f._id?.length > 12 ? f._id.slice(0, 12) + '...' : f._id, votes: f.count }))}>
-                  <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', color: '#fff' }} />
-                  <Bar dataKey="votes" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                  <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#1e293b' }} />
+                  <Bar dataKey="votes" fill="#3b82f6" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-64 text-surface-500">No data yet</div>
+              <div className="flex items-center justify-center h-64 text-surface-400">No data yet</div>
             )}
           </div>
 
           {/* Activity Feed */}
           <div className="card p-6">
-            <h2 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-400" /> Live Activity
+            <h2 className="text-lg font-semibold text-surface-900 mb-5 flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber-600" /> Live Activity
             </h2>
             <div ref={feedRef} className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
               <AnimatePresence>
@@ -199,24 +205,24 @@ const LiveMonitor: React.FC = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }}
-                    className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.03]"
+                    className="p-3 rounded-xl bg-surface-50 border border-surface-200"
                   >
                     <div className="flex items-start gap-2.5">
                       <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                        event.type === 'vote' ? 'bg-accent-400 shadow-sm shadow-accent-400/50' :
-                        event.type === 'milestone' ? 'bg-amber-400' : 'bg-primary-400'
+                        event.type === 'vote' ? 'bg-accent-500' :
+                        event.type === 'milestone' ? 'bg-amber-500' : 'bg-primary-500'
                       }`} />
                       <div>
-                        <p className="text-sm text-surface-300">{event.message}</p>
-                        <p className="text-xs text-surface-500 mt-0.5">{new Date(event.timestamp).toLocaleTimeString()}</p>
+                        <p className="text-sm text-surface-600">{event.message}</p>
+                        <p className="text-xs text-surface-400 mt-0.5">{new Date(event.timestamp).toLocaleTimeString()}</p>
                       </div>
                     </div>
                   </motion.div>
                 )) : (
                   <div className="text-center py-12">
-                    <Activity className="w-8 h-8 text-surface-700 mx-auto mb-3" />
+                    <Activity className="w-8 h-8 text-surface-400 mx-auto mb-3" />
                     <p className="text-sm text-surface-500">Waiting for activity...</p>
-                    <p className="text-xs text-surface-600 mt-1">Events appear here in real-time</p>
+                    <p className="text-xs text-surface-500 mt-1">Events appear here in real-time</p>
                   </div>
                 )}
               </AnimatePresence>
@@ -227,8 +233,8 @@ const LiveMonitor: React.FC = () => {
         {/* Faculty Leaderboard */}
         {facultyTurnout.length > 0 && (
           <div className="mt-6 card p-6">
-            <h2 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-primary-400" /> Faculty Participation Leaderboard
+            <h2 className="text-lg font-semibold text-surface-900 mb-5 flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary-600" /> Faculty Participation Leaderboard
             </h2>
             <div className="space-y-3">
               {[...facultyTurnout].sort((a: any, b: any) => b.count - a.count).map((f: any, i: number) => {
@@ -236,16 +242,16 @@ const LiveMonitor: React.FC = () => {
                 return (
                   <div key={f._id} className="flex items-center gap-4">
                     <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold ${
-                      i === 0 ? 'bg-amber-500/15 text-amber-400' :
-                      i === 1 ? 'bg-surface-700 text-surface-300' :
-                      i === 2 ? 'bg-amber-800/15 text-amber-600' : 'bg-surface-800 text-surface-500'
+                      i === 0 ? 'bg-amber-50 text-amber-600' :
+                      i === 1 ? 'bg-surface-200 text-surface-600' :
+                      i === 2 ? 'bg-amber-50 text-amber-600' : 'bg-surface-100 text-surface-500'
                     }`}>
                       {i + 1}
                     </span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm text-white font-medium">{f._id}</span>
-                        <span className="text-sm text-surface-400">{f.count} votes ({pct}%)</span>
+                        <span className="text-sm text-surface-900 font-medium">{f._id}</span>
+                        <span className="text-sm text-surface-500">{f.count} votes ({pct}%)</span>
                       </div>
                       <div className="progress-bar" style={{ height: '5px' }}>
                         <motion.div
@@ -266,22 +272,22 @@ const LiveMonitor: React.FC = () => {
         {/* Live Results */}
         {results?.showResults && results.positions && (
           <div className="mt-6">
-            <h2 className="text-xl font-display font-bold text-white mb-6 flex items-center gap-2.5">
+            <h2 className="text-xl font-display font-bold text-surface-900 mb-6 flex items-center gap-2.5">
               <span className="live-dot" /> Live Results
             </h2>
             {Object.entries(results.positions).map(([pos, cands]: [string, any]) => {
               const sorted = [...cands].sort((a: any, b: any) => b.voteCount - a.voteCount);
               return (
                 <div key={pos} className="mb-6 card p-6">
-                  <h3 className="font-semibold text-white mb-4">{pos}</h3>
+                  <h3 className="font-semibold text-surface-900 mb-4">{pos}</h3>
                   <div className="space-y-3">
                     {sorted.map((c: any, i: number) => (
                       <div key={c.id} className="flex items-center gap-4">
-                        <span className={`text-lg font-display font-bold ${i === 0 ? 'text-amber-400' : 'text-surface-500'}`}>#{i + 1}</span>
+                        <span className={`text-lg font-display font-bold ${i === 0 ? 'text-amber-600' : 'text-surface-500'}`}>#{i + 1}</span>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-white font-medium">{c.fullName}</span>
-                            <span className="text-primary-400 font-bold">{c.voteCount} ({c.percentage}%)</span>
+                            <span className="text-surface-900 font-medium">{c.fullName}</span>
+                            <span className="text-primary-600 font-bold">{c.voteCount} ({c.percentage}%)</span>
                           </div>
                           <div className="progress-bar" style={{ height: '8px' }}>
                             <motion.div
@@ -289,7 +295,7 @@ const LiveMonitor: React.FC = () => {
                               animate={{ width: `${c.percentage}%` }}
                               transition={{ duration: 1.5, type: 'spring' }}
                               className="h-full rounded-full"
-                              style={{ background: ['#6366f1', '#a855f7', '#ec4899', '#f59e0b'][i % 4] }}
+                              style={{ background: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'][i % 4] }}
                             />
                           </div>
                         </div>

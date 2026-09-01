@@ -1,13 +1,18 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { EligibleVoter } from '../models';
 import { createOtpSession, verifyOtp } from '../services/otpService';
-import { generateStudentToken } from '../middleware/auth';
+import {
+  authenticateStudent,
+  clearAuthCookies,
+  generateStudentToken,
+  setAuthCookie,
+} from '../middleware/auth';
 import { createAuditLog } from '../services/auditService';
 
 const router = Router();
 
 // POST /api/auth/request-otp
-router.post('/request-otp', async (req: Request, res: Response) => {
+router.post('/request-otp', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { studentId, email } = req.body;
 
@@ -54,14 +59,11 @@ router.post('/request-otp', async (req: Request, res: Response) => {
       demoOtp: otp,
       expiresInMinutes: parseInt(process.env.OTP_EXPIRY_MINUTES || '5', 10),
     });
-  } catch (error) {
-    console.error('OTP request error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/auth/verify-otp
-router.post('/verify-otp', async (req: Request, res: Response) => {
+router.post('/verify-otp', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { studentId, email, otp } = req.body;
 
@@ -94,15 +96,18 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
     const voter = await EligibleVoter.findOne({
       studentId: studentId.toUpperCase().trim(),
       email: email.toLowerCase().trim(),
+      isActive: true,
     });
 
     if (!voter) {
-      res.status(404).json({ message: 'Voter record not found' });
+      res.status(404).json({ message: 'Voter record not found or inactive' });
       return;
     }
 
     // Generate JWT token for student
     const token = generateStudentToken(voter);
+    clearAuthCookies(res);
+    setAuthCookie(res, 'student', token);
 
     await createAuditLog(
       'OTP_VERIFIED',
@@ -115,7 +120,6 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
 
     res.json({
       message: 'Authentication successful',
-      token,
       student: {
         id: voter._id,
         studentId: voter.studentId,
@@ -127,10 +131,42 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
         votedElectionIds: voter.votedElectionIds,
       },
     });
-  } catch (error) {
-    console.error('OTP verification error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
+});
+
+// POST /api/auth/logout
+router.post('/logout', (_req: Request, res: Response) => {
+  clearAuthCookies(res);
+  res.json({ message: 'Logged out successfully' });
+});
+
+// GET /api/auth/me
+router.get('/me', authenticateStudent, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const voter = await EligibleVoter.findOne({
+      studentId: req.studentVoter.studentId,
+      email: req.studentVoter.email,
+      isActive: true,
+    });
+
+    if (!voter) {
+      res.status(404).json({ message: 'Voter record not found' });
+      return;
+    }
+
+    res.json({
+      id: voter._id,
+      studentId: voter.studentId,
+      fullName: voter.fullName,
+      email: voter.email,
+      faculty: voter.faculty,
+      department: voter.department,
+      hasVoted: voter.hasVoted,
+      votedElectionIds: voter.votedElectionIds,
+    });
+  } catch (error) { next(error); }
 });
 
 export default router;
+
+

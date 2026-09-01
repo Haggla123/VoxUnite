@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
-import { AdminRoute, StudentRoute } from './components/auth/ProtectedRoute';
+import { AdminRoute, AuthenticatedRoute, StudentRoute } from './components/auth/ProtectedRoute';
 import Navbar from './components/layout/Navbar';
 
 // Pages
@@ -22,16 +22,15 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-surface-950">
+        <div className="min-h-screen bg-white">
           <Navbar />
           <Toaster position="top-right" toastOptions={{
             style: {
-              background: 'rgba(15, 23, 42, 0.9)',
-              backdropFilter: 'blur(16px)',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '14px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              background: '#ffffff',
+              color: '#1e293b',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
               fontSize: '14px',
               fontWeight: '500',
             },
@@ -43,7 +42,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<StudentLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/live" element={<LiveMonitor />} />
+            <Route path="/live" element={<AuthenticatedRoute><LiveMonitor /></AuthenticatedRoute>} />
             <Route path="/results/:id" element={<ResultsPage />} />
 
             {/* Student Protected */}

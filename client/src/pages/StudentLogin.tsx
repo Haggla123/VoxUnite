@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Vote, Mail, Hash, ArrowRight, KeyRound, Loader2, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { Vote, Mail, Hash, ArrowRight, KeyRound, Loader2, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { requestOtp, verifyOtp } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -35,7 +35,7 @@ const StudentLogin: React.FC = () => {
     setLoading(true); setError('');
     try {
       const { data } = await verifyOtp(studentId, email, otp);
-      loginStudent(data.token, data.student);
+      loginStudent(data.student);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'OTP verification failed');
@@ -43,45 +43,37 @@ const StudentLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen animated-gradient flex items-center justify-center p-4 relative">
-      {/* Ambient backgrounds */}
-      <div className="absolute inset-0 grid-pattern" />
-      <div className="hero-glow hero-glow-1" />
-      <div className="hero-glow hero-glow-2" />
-
+    <div className="min-h-[calc(100vh-4rem)] bg-surface-50 flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
-        className="relative w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md"
       >
-        {/* Glow behind card */}
-        <div className="absolute -inset-2 bg-gradient-to-br from-primary-500/15 to-purple-500/15 rounded-3xl blur-2xl" />
-
-        <div className="relative glass rounded-3xl p-8 sm:p-10">
+        <div className="bg-white rounded-xl border border-surface-200 shadow-lg shadow-surface-200/50 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary-500/25">
-              <Vote className="w-8 h-8 text-white" />
+            <div className="w-14 h-14 rounded-xl bg-primary-50 flex items-center justify-center mx-auto mb-4">
+              <Vote className="w-7 h-7 text-primary-600" />
             </div>
-            <h1 className="text-2xl font-display font-bold text-white tracking-tight">Student Verification</h1>
-            <p className="text-surface-400 mt-2 text-sm">Authenticate to access your ballot</p>
+            <h1 className="text-xl font-bold text-surface-900 tracking-tight">Student Verification</h1>
+            <p className="text-surface-500 mt-1.5 text-sm">Authenticate to access your ballot</p>
           </div>
 
           {/* Step indicator */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 ${
+          <div className="flex items-center justify-center gap-3 mb-7">
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               step === 'credentials'
-                ? 'bg-primary-500/15 text-primary-300 border border-primary-500/20'
-                : 'bg-accent-500/15 text-accent-300 border border-accent-500/20'
+                ? 'bg-primary-50 text-primary-700 border border-primary-100'
+                : 'bg-accent-50 text-accent-700 border border-accent-100'
             }`}>
               {step === 'otp' ? <CheckCircle className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />} Identity
             </div>
-            <div className="w-10 h-px bg-gradient-to-r from-white/20 to-white/5" />
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 ${
+            <div className="w-8 h-px bg-surface-200" />
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               step === 'otp'
-                ? 'bg-primary-500/15 text-primary-300 border border-primary-500/20'
-                : 'bg-white/[0.03] text-surface-500 border border-white/5'
+                ? 'bg-primary-50 text-primary-700 border border-primary-100'
+                : 'bg-surface-50 text-surface-400 border border-surface-200'
             }`}>
               <KeyRound className="w-3.5 h-3.5" /> OTP
             </div>
@@ -91,10 +83,10 @@ const StudentLogin: React.FC = () => {
           <AnimatePresence mode="wait">
             {error && (
               <motion.div
-                initial={{ opacity: 0, y: -10, height: 0 }}
+                initial={{ opacity: 0, y: -8, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -5, height: 0 }}
-                className="flex items-center gap-2.5 p-3.5 mb-5 rounded-xl bg-red-500/10 border border-red-500/15 text-red-300 text-sm overflow-hidden"
+                exit={{ opacity: 0, y: -4, height: 0 }}
+                className="flex items-center gap-2 p-3 mb-5 rounded-lg bg-danger-50 border border-danger-100 text-danger-600 text-sm overflow-hidden"
               >
                 <AlertCircle className="w-4 h-4 shrink-0" /> {error}
               </motion.div>
@@ -109,14 +101,14 @@ const StudentLogin: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.25 }}
                 onSubmit={handleRequestOtp}
-                className="space-y-5"
+                className="space-y-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-surface-300 mb-2">Student ID</label>
+                  <label className="block text-sm font-medium text-surface-700 mb-1.5">Student ID</label>
                   <div className="relative">
-                    <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-500" />
+                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                     <input
                       type="text"
                       value={studentId}
@@ -128,9 +120,9 @@ const StudentLogin: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-surface-300 mb-2">Institutional Email</label>
+                  <label className="block text-sm font-medium text-surface-700 mb-1.5">Institutional Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-500" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                     <input
                       type="email"
                       value={email}
@@ -144,9 +136,9 @@ const StudentLogin: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full mt-2 rounded-xl"
+                  className="btn-primary w-full mt-1 py-2.5 rounded-lg"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Request OTP <ArrowRight className="w-5 h-5" /></>}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Request OTP <ArrowRight className="w-4 h-4" /></>}
                 </button>
               </motion.form>
             ) : (
@@ -155,28 +147,28 @@ const StudentLogin: React.FC = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.25 }}
                 onSubmit={handleVerifyOtp}
-                className="space-y-5"
+                className="space-y-4"
               >
                 {/* Welcome banner */}
-                <div className="text-center p-4 rounded-xl bg-accent-500/8 border border-accent-500/15">
-                  <p className="text-accent-300 text-sm">Welcome, <span className="font-semibold">{studentName}</span></p>
-                  <p className="text-surface-500 text-xs mt-1">OTP sent to your email</p>
+                <div className="text-center p-3 rounded-lg bg-accent-50 border border-accent-100">
+                  <p className="text-accent-700 text-sm">Welcome, <span className="font-semibold">{studentName}</span></p>
+                  <p className="text-surface-400 text-xs mt-0.5">OTP sent to your email</p>
                 </div>
 
                 {/* Demo OTP */}
-                <div className="p-4 rounded-xl bg-amber-500/8 border border-amber-500/15">
-                  <p className="text-amber-300 text-xs font-semibold mb-1.5 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" /> Demo Mode — Your OTP:
+                <div className="p-3 rounded-lg bg-warning-50 border border-warning-100">
+                  <p className="text-warning-600 text-xs font-medium mb-1 flex items-center gap-1">
+                    <Info className="w-3.5 h-3.5" /> Demo Mode — Your OTP:
                   </p>
-                  <p className="text-3xl font-display font-bold text-amber-200 tracking-[0.3em] text-center">{demoOtp}</p>
+                  <p className="text-2xl font-bold text-warning-700 tracking-[0.3em] text-center font-mono">{demoOtp}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-surface-300 mb-2">Enter OTP</label>
+                  <label className="block text-sm font-medium text-surface-700 mb-1.5">Enter OTP</label>
                   <div className="relative">
-                    <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-500" />
+                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                     <input
                       type="text"
                       value={otp}
@@ -192,15 +184,15 @@ const StudentLogin: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full rounded-xl"
+                  className="btn-primary w-full py-2.5 rounded-lg"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Verify & Continue <ArrowRight className="w-5 h-5" /></>}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Verify & Continue <ArrowRight className="w-4 h-4" /></>}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setStep('credentials'); setError(''); }}
-                  className="w-full py-2 text-surface-500 hover:text-surface-300 text-sm transition-colors text-center"
+                  className="w-full py-2 text-surface-500 hover:text-surface-700 text-sm transition-colors text-center"
                 >
                   ← Back to credentials
                 </button>

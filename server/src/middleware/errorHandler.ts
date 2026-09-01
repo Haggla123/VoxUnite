@@ -44,6 +44,15 @@ export const errorHandler = (
     return;
   }
 
+  // Mongoose invalid ObjectId or cast error
+  if (err.name === 'CastError') {
+    res.status(400).json({
+      status: 'error',
+      message: 'Invalid ID',
+    });
+    return;
+  }
+
   console.error('Unhandled Error:', err);
   res.status(500).json({
     status: 'error',

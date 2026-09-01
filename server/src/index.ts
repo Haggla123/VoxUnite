@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import dotenv from 'dotenv';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { authenticateSocket } from './middleware/auth';
 
 import adminAuthRoutes from './routes/adminAuth';
 import studentAuthRoutes from './routes/studentAuth';
@@ -20,6 +21,13 @@ import resultRoutes from './routes/results';
 import analyticsRoutes from './routes/analytics';
 
 dotenv.config();
+
+const requiredEnv = ['JWT_SECRET'];
+const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+
+if (missingEnv.length > 0) {
+  throw new Error(`Missing required environment variable${missingEnv.length === 1 ? '' : 's'}: ${missingEnv.join(', ')}`);
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -55,10 +63,24 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Socket.io
+io.use(authenticateSocket);
+
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
-  socket.on('join:election', (electionId: string) => { socket.join(`election:${electionId}`); });
-  socket.on('leave:election', (electionId: string) => { socket.leave(`election:${electionId}`); });
+  socket.on('join:election', (electionId: string) => {
+    if (!socket.data.user) {
+      socket.disconnect(true);
+      return;
+    }
+    socket.join(`election:${electionId}`);
+  });
+  socket.on('leave:election', (electionId: string) => {
+    if (!socket.data.user) {
+      socket.disconnect(true);
+      return;
+    }
+    socket.leave(`election:${electionId}`);
+  });
   socket.on('disconnect', () => { console.log(`Client disconnected: ${socket.id}`); });
 });
 

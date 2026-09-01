@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs';
+import { randomInt } from 'crypto';
 import { OtpSession } from '../models';
 import bcrypt from 'bcryptjs';
 
@@ -6,7 +8,7 @@ const OTP_MAX_RETRIES = parseInt(process.env.OTP_MAX_RETRIES || '3', 10);
 const OTP_SALT_ROUNDS = parseInt(process.env.OTP_SALT_ROUNDS || '10', 10);
 
 export const generateOTP = (): string => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(100000, 1000000).toString();
 };
 
 export const createOtpSession = async (
@@ -26,14 +28,14 @@ export const createOtpSession = async (
   const session = await OtpSession.create({
     studentId,
     email,
-    otp,
+    otp: otpHash,
     expiresAt,
     retryCount: 0,
     isVerified: false,
     isUsed: false,
   });
 
-  return { otp, sessionId: session._id as string };
+  return { otp, sessionId: session._id.toString() };
 };
 
 export const verifyOtp = async (
@@ -46,21 +48,32 @@ export const verifyOtp = async (
     email: email.toLowerCase(),
     isUsed: false,
     isVerified: false,
-  }).sort({ createdAt: -1 });
+  }).select('+otp').sort({ createdAt: -1 });
 
   if (!session) {
     return { valid: false, message: 'No active OTP session found. Please request a new OTP.' };
   }
 
   if (new Date() > session.expiresAt) {
-    session.isUsed = true;
-    await session.save();
+    await OtpSession.updateOne(
+      { _id: session._id, isUsed: false, isVerified: false },
+      { $set: { isUsed: true } }
+    );
     return { valid: false, message: 'OTP has expired. Please request a new one.' };
   }
 
-  if (session.retryCount >= OTP_MAX_RETRIES) {
-    session.isUsed = true;
-    await session.save();
+  const reserveResult = await OtpSession.updateOne(
+    {
+      _id: session._id,
+      isUsed: false,
+      isVerified: false,
+      expiresAt: { $gt: new Date() },
+      retryCount: { $lt: OTP_MAX_RETRIES },
+    },
+    { $inc: { retryCount: 1 } }
+  );
+
+  if (reserveResult.matchedCount === 0 || reserveResult.modifiedCount === 0) {
     return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
   }
 
@@ -70,14 +83,23 @@ export const verifyOtp = async (
     await session.save();
     return {
       valid: false,
-      message: `Invalid OTP. ${OTP_MAX_RETRIES - session.retryCount} attempts remaining.`,
+      message: `Invalid OTP. ${OTP_MAX_RETRIES - updatedRetryCount} attempts remaining.`,
     };
   }
 
-  // Valid OTP
-  session.isVerified = true;
-  session.isUsed = true;
-  await session.save();
+  const verifiedResult = await OtpSession.updateOne(
+    {
+      _id: reservedSession._id,
+      isUsed: false,
+      isVerified: false,
+      expiresAt: { $gt: new Date() },
+    },
+    { $set: { isVerified: true, isUsed: true } }
+  );
+
+  if (verifiedResult.matchedCount === 0 || verifiedResult.modifiedCount === 0) {
+    return { valid: false, message: 'OTP has already been used or expired. Please request a new one.' };
+  }
 
   return { valid: true, message: 'OTP verified successfully' };
 };

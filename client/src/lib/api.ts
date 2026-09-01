@@ -3,32 +3,20 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: '/api',
   timeout: 30000,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
-});
-
-api.interceptors.request.use((config) => {
-  const adminToken = localStorage.getItem('adminToken');
-  const studentToken = localStorage.getItem('studentToken');
-  const token = adminToken || studentToken;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-api.interceptors.response.use((res) => res, (error) => {
-  if (error.response?.status === 401) {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('studentToken');
-  }
-  return Promise.reject(error);
 });
 
 // Admin Auth
 export const adminLogin = (email: string, password: string) => api.post('/admin/login', { email, password });
 export const getAdminProfile = () => api.get('/admin/me');
+export const adminLogout = () => api.post('/admin/logout');
 
 // Student Auth
 export const requestOtp = (studentId: string, email: string) => api.post('/auth/request-otp', { studentId, email });
 export const verifyOtp = (studentId: string, email: string, otp: string) => api.post('/auth/verify-otp', { studentId, email, otp });
+export const getStudentProfile = () => api.get('/auth/me');
+export const studentLogout = () => api.post('/auth/logout');
 
 // Elections
 export const getElections = (params?: any) => api.get('/elections', { params });
