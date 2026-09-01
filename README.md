@@ -85,7 +85,6 @@ VoxUnite follows a client-server architecture.
 
 ### Architecture Layers
 
-```text
 Users
   │
   ▼
@@ -573,18 +572,16 @@ GET	/api/analytics/dashboard	Admin	Dashboard analytics
 GET	/api/analytics/audit-logs	Admin	Retrieve audit logs
 
 ## Screenshots
-Authentication
+![Authentication](screenshots/Student-Verification.png)
 
-Student Dashboard
+![Student Dashboard](screenshots/Student-Dashboard.png)
 
-Voting Interface
+![Voting Interface](screenshots/Voting-Interface.png)
 
-Administrator Dashboard
+![Administrator Dashboard](screenshots/Admin-Dashboard.png)
 
-Election Results
+![Election Results](screenshots/Election-Results.png)
 
-Screenshot filenames should match the files available in the
-screenshots/ directory.
 
 ## Known Limitations
 
