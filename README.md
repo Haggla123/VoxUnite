@@ -572,14 +572,19 @@ GET	/api/analytics/dashboard	Admin	Dashboard analytics
 GET	/api/analytics/audit-logs	Admin	Retrieve audit logs
 
 ## Screenshots
+Authentication
 ![Authentication](screenshots/Student-Verification.png)
 
+Student Dashboard
 ![Student Dashboard](screenshots/Student-Dashboard.png)
 
+Voting Interface
 ![Voting Interface](screenshots/Voting-Interface.png)
 
+Administrator Dashboard
 ![Administrator Dashboard](screenshots/Admin-Dashboard.png)
 
+Election Results
 ![Election Results](screenshots/Election-Results.png)
 
 
