@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { Candidate } from '../models';
 import { authenticateAdmin } from '../middleware/auth';
 import { uploadCandidatePhoto } from '../middleware/upload';
@@ -6,14 +6,14 @@ import { createAuditLog } from '../services/auditService';
 
 const router = Router();
 
-router.get('/election/:electionId', async (req: Request, res: Response) => {
+router.get('/election/:electionId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const candidates = await Candidate.find({ electionId: req.params.electionId }).sort({ position: 1, fullName: 1 });
     res.json(candidates);
-  } catch (error) { res.status(500).json({ message: 'Server error' }); }
+  } catch (error) { next(error); }
 });
 
-router.post('/', authenticateAdmin, uploadCandidatePhoto.single('photo'), async (req: Request, res: Response) => {
+router.post('/', authenticateAdmin, uploadCandidatePhoto.single('photo'), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { fullName, manifesto, slogan, faculty, department, position, electionId } = req.body;
     const candidate = await Candidate.create({
@@ -22,10 +22,10 @@ router.post('/', authenticateAdmin, uploadCandidatePhoto.single('photo'), async 
     });
     await createAuditLog('CANDIDATE_ADDED', req.user.email, 'admin', { candidateId: candidate._id, name: fullName, position, electionId }, req.ip || '', req.headers['user-agent'] || '');
     res.status(201).json(candidate);
-  } catch (error) { res.status(500).json({ message: 'Server error' }); }
+  } catch (error) { next(error); }
 });
 
-router.put('/:id', authenticateAdmin, uploadCandidatePhoto.single('photo'), async (req: Request, res: Response) => {
+router.put('/:id', authenticateAdmin, uploadCandidatePhoto.single('photo'), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updates: any = { ...req.body };
     if (req.file) updates.photo = `/uploads/candidates/${req.file.filename}`;
@@ -33,15 +33,17 @@ router.put('/:id', authenticateAdmin, uploadCandidatePhoto.single('photo'), asyn
     if (!candidate) { res.status(404).json({ message: 'Candidate not found' }); return; }
     await createAuditLog('CANDIDATE_UPDATED', req.user.email, 'admin', { candidateId: candidate._id }, req.ip || '', req.headers['user-agent'] || '');
     res.json(candidate);
-  } catch (error) { res.status(500).json({ message: 'Server error' }); }
+  } catch (error) { next(error); }
 });
 
-router.delete('/:id', authenticateAdmin, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const candidate = await Candidate.findByIdAndDelete(req.params.id);
     if (!candidate) { res.status(404).json({ message: 'Candidate not found' }); return; }
     res.json({ message: 'Candidate deleted' });
-  } catch (error) { res.status(500).json({ message: 'Server error' }); }
+  } catch (error) { next(error); }
 });
 
 export default router;
+
+

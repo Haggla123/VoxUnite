@@ -22,6 +22,13 @@ import analyticsRoutes from './routes/analytics';
 
 dotenv.config();
 
+const requiredEnv = ['JWT_SECRET'];
+const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+
+if (missingEnv.length > 0) {
+  throw new Error(`Missing required environment variable${missingEnv.length === 1 ? '' : 's'}: ${missingEnv.join(', ')}`);
+}
+
 const app = express();
 const httpServer = createServer(app);
 

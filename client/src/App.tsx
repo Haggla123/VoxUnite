@@ -22,16 +22,15 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-surface-950">
+        <div className="min-h-screen bg-white">
           <Navbar />
           <Toaster position="top-right" toastOptions={{
             style: {
-              background: 'rgba(15, 23, 42, 0.9)',
-              backdropFilter: 'blur(16px)',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '14px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              background: '#ffffff',
+              color: '#1e293b',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
               fontSize: '14px',
               fontWeight: '500',
             },

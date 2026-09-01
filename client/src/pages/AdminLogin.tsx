@@ -27,44 +27,39 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen animated-gradient flex items-center justify-center p-4 relative">
-      <div className="absolute inset-0 grid-pattern" />
-      <div className="hero-glow hero-glow-1" />
-      <div className="hero-glow hero-glow-2" />
-
+    <div className="min-h-[calc(100vh-4rem)] bg-surface-50 flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
-        className="relative w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md"
       >
-        <div className="absolute -inset-2 bg-gradient-to-br from-primary-700/15 to-purple-700/15 rounded-3xl blur-2xl" />
-        <div className="relative glass rounded-3xl p-8 sm:p-10">
+        <div className="bg-white rounded-xl border border-surface-200 shadow-lg shadow-surface-200/50 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-700 to-primary-900 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary-700/25">
-              <Shield className="w-8 h-8 text-primary-300" />
+            <div className="w-14 h-14 rounded-xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-7 h-7 text-surface-600" />
             </div>
-            <h1 className="text-2xl font-display font-bold text-white tracking-tight">Admin Portal</h1>
-            <p className="text-surface-400 mt-2 text-sm">Authorized personnel only</p>
+            <h1 className="text-xl font-bold text-surface-900 tracking-tight">Admin Portal</h1>
+            <p className="text-surface-500 mt-1.5 text-sm">Authorized personnel only</p>
           </div>
 
           {/* Error */}
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2.5 p-3.5 mb-5 rounded-xl bg-red-500/10 border border-red-500/15 text-red-300 text-sm"
+              className="flex items-center gap-2 p-3 mb-5 rounded-lg bg-danger-50 border border-danger-100 text-danger-600 text-sm"
             >
               <AlertCircle className="w-4 h-4 shrink-0" /> {error}
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-surface-300 mb-2">Email</label>
+              <label className="block text-sm font-medium text-surface-700 mb-1.5">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-500" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                 <input
                   type="email"
                   value={email}
@@ -76,9 +71,9 @@ const AdminLogin: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-surface-300 mb-2">Password</label>
+              <label className="block text-sm font-medium text-surface-700 mb-1.5">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-500" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                 <input
                   type="password"
                   value={password}
@@ -92,15 +87,15 @@ const AdminLogin: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full mt-2 rounded-xl"
+              className="btn-primary w-full mt-1 py-2.5 rounded-lg"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Sign In <Shield className="w-4 h-4" /></>}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Sign In <Shield className="w-4 h-4" /></>}
             </button>
           </form>
 
-          <div className="mt-8 p-4 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-            <p className="text-xs text-surface-500">
-              Demo: <span className="text-surface-400 font-mono">admin@university.edu</span> / <span className="text-surface-400 font-mono">Admin@VoxUnite2024</span>
+          <div className="mt-6 p-3 rounded-lg bg-surface-50 border border-surface-200 text-center">
+            <p className="text-xs text-surface-400">
+              Demo: <span className="text-surface-600 font-mono">admin@university.edu</span> / <span className="text-surface-600 font-mono">Admin@VoxUnite2024</span>
             </p>
           </div>
         </div>

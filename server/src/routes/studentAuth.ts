@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { EligibleVoter } from '../models';
 import { createOtpSession, verifyOtp } from '../services/otpService';
 import {
@@ -12,7 +12,7 @@ import { createAuditLog } from '../services/auditService';
 const router = Router();
 
 // POST /api/auth/request-otp
-router.post('/request-otp', async (req: Request, res: Response) => {
+router.post('/request-otp', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { studentId, email } = req.body;
 
@@ -59,14 +59,11 @@ router.post('/request-otp', async (req: Request, res: Response) => {
       demoOtp: otp,
       expiresInMinutes: parseInt(process.env.OTP_EXPIRY_MINUTES || '5', 10),
     });
-  } catch (error) {
-    console.error('OTP request error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/auth/verify-otp
-router.post('/verify-otp', async (req: Request, res: Response) => {
+router.post('/verify-otp', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { studentId, email, otp } = req.body;
 
@@ -134,10 +131,7 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
         votedElectionIds: voter.votedElectionIds,
       },
     });
-  } catch (error) {
-    console.error('OTP verification error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 // POST /api/auth/logout
@@ -147,7 +141,7 @@ router.post('/logout', (_req: Request, res: Response) => {
 });
 
 // GET /api/auth/me
-router.get('/me', authenticateStudent, async (req: Request, res: Response) => {
+router.get('/me', authenticateStudent, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const voter = await EligibleVoter.findOne({
       studentId: req.studentVoter.studentId,
@@ -170,9 +164,9 @@ router.get('/me', authenticateStudent, async (req: Request, res: Response) => {
       hasVoted: voter.hasVoted,
       votedElectionIds: voter.votedElectionIds,
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (error) { next(error); }
 });
 
 export default router;
+
+
