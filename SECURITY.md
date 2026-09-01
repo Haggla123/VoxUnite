@@ -61,3 +61,4 @@ The model assumes the application is deployed over HTTPS, `JWT_SECRET` is kept p
 - Add rate limits to login, OTP request, OTP verification, vote submission, and Socket.io connection attempts.
 - Use MongoDB transactions for vote creation, voter history updates, candidate counts, and election totals.
 - Add structured security tests for authentication, cookie behavior, OTP retries, socket handshakes, and duplicate-vote prevention.
+

@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { randomInt } from 'crypto';
 import { OtpSession } from '../models';
+import bcrypt from 'bcryptjs';
 
 const OTP_EXPIRY_MINUTES = parseInt(process.env.OTP_EXPIRY_MINUTES || '5', 10);
 const OTP_MAX_RETRIES = parseInt(process.env.OTP_MAX_RETRIES || '3', 10);
@@ -20,7 +21,7 @@ export const createOtpSession = async (
     { isUsed: true }
   );
 
-  const otp = generateOTP();
+  const otp = generateOTP(); 
   const otpHash = await bcrypt.hash(otp, OTP_SALT_ROUNDS);
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
@@ -76,22 +77,10 @@ export const verifyOtp = async (
     return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
   }
 
-  const reservedSession = await OtpSession.findById(session._id).select('+otp');
-  if (!reservedSession || !reservedSession.otp) {
-    return { valid: false, message: 'OTP session is invalid. Please request a new OTP.' };
-  }
-
-  const otpMatches = await bcrypt.compare(otp, reservedSession.otp);
+  const otpMatches = await bcrypt.compare(otp, session.otp);  
   if (!otpMatches) {
-    const updatedRetryCount = reservedSession.retryCount + 1;
-    if (updatedRetryCount >= OTP_MAX_RETRIES) {
-      await OtpSession.updateOne(
-        { _id: reservedSession._id, isUsed: false, isVerified: false },
-        { $set: { isUsed: true } }
-      );
-      return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
-    }
-
+    session.retryCount += 1;
+    await session.save();
     return {
       valid: false,
       message: `Invalid OTP. ${OTP_MAX_RETRIES - updatedRetryCount} attempts remaining.`,
