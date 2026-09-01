@@ -53,8 +53,8 @@ Use `COOKIE_SAME_SITE=none` only when the API and client are on different sites 
 ### 3. Seed Demo Data
 
 ```bash
-cd server
-npm run seed
+cd ..
+npm run seed --prefix server
 ```
 
 This creates:
@@ -65,10 +65,16 @@ This creates:
 
 ### 4. Start Development
 
+Open two terminals.
+
+Terminal 1:
 ```bash
 cd server
 npm run dev
+```
 
+Terminal 2:
+```bash
 cd client
 npm run dev
 ```

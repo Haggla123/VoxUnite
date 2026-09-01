@@ -54,31 +54,59 @@ export const verifyOtp = async (
   }
 
   if (new Date() > session.expiresAt) {
-    session.isUsed = true;
-    await session.save();
+    await OtpSession.updateOne(
+      { _id: session._id, isUsed: false, isVerified: false },
+      { $set: { isUsed: true } }
+    );
     return { valid: false, message: 'OTP has expired. Please request a new one.' };
   }
 
-  if (session.retryCount >= OTP_MAX_RETRIES) {
-    session.isUsed = true;
-    await session.save();
+  const reservedSession = await OtpSession.findOneAndUpdate(
+    {
+      _id: session._id,
+      isUsed: false,
+      isVerified: false,
+      expiresAt: { $gt: new Date() },
+      retryCount: { $lt: OTP_MAX_RETRIES },
+    },
+    { $inc: { retryCount: 1 } },
+    { new: true }
+  );
+
+  if (!reservedSession) {
     return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
   }
 
-  const otpMatches = await bcrypt.compare(otp, session.otp);
+  const otpMatches = await bcrypt.compare(otp, reservedSession.otp);
   if (!otpMatches) {
-    session.retryCount += 1;
-    await session.save();
+    if (reservedSession.retryCount >= OTP_MAX_RETRIES) {
+      await OtpSession.updateOne(
+        { _id: reservedSession._id, isUsed: false, isVerified: false },
+        { $set: { isUsed: true } }
+      );
+      return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
+    }
+
     return {
       valid: false,
-      message: `Invalid OTP. ${OTP_MAX_RETRIES - session.retryCount} attempts remaining.`,
+      message: `Invalid OTP. ${OTP_MAX_RETRIES - reservedSession.retryCount} attempts remaining.`,
     };
   }
 
-  // Valid OTP
-  session.isVerified = true;
-  session.isUsed = true;
-  await session.save();
+  const verifiedSession = await OtpSession.findOneAndUpdate(
+    {
+      _id: reservedSession._id,
+      isUsed: false,
+      isVerified: false,
+      expiresAt: { $gt: new Date() },
+    },
+    { $set: { isVerified: true, isUsed: true } },
+    { new: true }
+  );
+
+  if (!verifiedSession) {
+    return { valid: false, message: 'OTP has already been used or expired. Please request a new one.' };
+  }
 
   return { valid: true, message: 'OTP verified successfully' };
 };

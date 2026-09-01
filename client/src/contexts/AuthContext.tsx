@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { adminLogout, getAdminProfile, getStudentProfile, studentLogout } from '../lib/api';
 import { disconnectSocket } from '../lib/socket';
 
@@ -26,38 +26,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isStudent: false,
     isLoading: true,
   });
+  const sessionRevisionRef = useRef(0);
 
   useEffect(() => {
     const init = async () => {
+      const revision = ++sessionRevisionRef.current;
+
       try {
         const { data } = await getAdminProfile();
+        if (revision !== sessionRevisionRef.current) return;
         setState({ admin: data, student: null, isAdmin: true, isStudent: false, isLoading: false });
         return;
       } catch {}
 
       try {
         const { data } = await getStudentProfile();
+        if (revision !== sessionRevisionRef.current) return;
         setState({ admin: null, student: data, isAdmin: false, isStudent: true, isLoading: false });
       } catch {
+        if (revision !== sessionRevisionRef.current) return;
         setState({ admin: null, student: null, isAdmin: false, isStudent: false, isLoading: false });
       }
     };
+
     init();
   }, []);
 
   const loginAdmin = (admin: any) => {
+    sessionRevisionRef.current += 1;
     setState({ admin, student: null, isAdmin: true, isStudent: false, isLoading: false });
   };
 
   const loginStudent = (student: any) => {
+    sessionRevisionRef.current += 1;
     setState({ admin: null, student, isAdmin: false, isStudent: true, isLoading: false });
   };
 
   const logout = async () => {
+    const revision = ++sessionRevisionRef.current;
     const logoutRequest = state.isAdmin ? adminLogout : studentLogout;
     try {
       await logoutRequest();
     } catch {}
+
+    if (revision !== sessionRevisionRef.current) return;
     disconnectSocket();
     setState({ admin: null, student: null, isAdmin: false, isStudent: false, isLoading: false });
   };

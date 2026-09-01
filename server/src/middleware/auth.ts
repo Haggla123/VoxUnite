@@ -132,7 +132,18 @@ export const authenticateStudent = async (
       return;
     }
 
-    req.studentVoter = decoded;
+    const voter = await EligibleVoter.findOne({
+      studentId: decoded.studentId,
+      email: decoded.email,
+      isActive: true,
+    });
+
+    if (!voter) {
+      res.status(401).json({ message: 'Invalid or inactive student session' });
+      return;
+    }
+
+    req.studentVoter = voter;
     next();
   } catch (error) {
     res.status(401).json({ message: 'Invalid or expired token' });

@@ -6,7 +6,7 @@ Security updates are applied to the current `main` branch unless a maintained re
 
 ## Reporting a Vulnerability
 
-Please report suspected vulnerabilities privately to the project maintainers instead of opening a public issue. Include:
+Please report suspected vulnerabilities privately via the project security contact: security@voxunite.app. Do not disclose suspected vulnerabilities publicly or open a public issue before the report has been triaged and a fix or mitigation is available. Include:
 
 - A description of the issue and affected area
 - Steps to reproduce or a proof of concept

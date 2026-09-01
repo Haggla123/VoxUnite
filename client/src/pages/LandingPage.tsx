@@ -216,7 +216,7 @@ const LandingPage: React.FC = () => {
           >
             {[
               { icon: Lock, title: 'Session Protection', desc: 'OTP verification, cookie-based JWT sessions, and duplicate-vote checks help protect election workflows.' },
-              { icon: Shield, title: 'Double-Vote Prevention', desc: 'Triple-layer protection at session, backend, and database levels prevents any duplicate voting attempts.' },
+              { icon: Shield, title: 'Double-Vote Prevention', desc: 'Triple-layer protection at session, backend, and database levels helps prevent duplicate submissions.' },
               { icon: Eye, title: 'Full Transparency', desc: 'Comprehensive audit logs, real-time monitoring, and verifiable results you can trust.' },
               { icon: Users, title: 'Institutional Integration', desc: 'CSV/XLSX voter import from your university registry. No student registration required.' },
               { icon: BarChart3, title: 'Live Analytics', desc: 'Real-time turnout tracking, faculty participation, and broadcast-quality result dashboards.' },

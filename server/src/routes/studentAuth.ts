@@ -99,10 +99,11 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
     const voter = await EligibleVoter.findOne({
       studentId: studentId.toUpperCase().trim(),
       email: email.toLowerCase().trim(),
+      isActive: true,
     });
 
     if (!voter) {
-      res.status(404).json({ message: 'Voter record not found' });
+      res.status(404).json({ message: 'Voter record not found or inactive' });
       return;
     }
 
