@@ -61,7 +61,7 @@ export const verifyOtp = async (
     return { valid: false, message: 'OTP has expired. Please request a new one.' };
   }
 
-  const reservedSession = await OtpSession.findOneAndUpdate(
+  const reserveResult = await OtpSession.updateOne(
     {
       _id: session._id,
       isUsed: false,
@@ -69,17 +69,22 @@ export const verifyOtp = async (
       expiresAt: { $gt: new Date() },
       retryCount: { $lt: OTP_MAX_RETRIES },
     },
-    { $inc: { retryCount: 1 } },
-    { new: true }
+    { $inc: { retryCount: 1 } }
   );
 
-  if (!reservedSession) {
+  if (reserveResult.matchedCount === 0 || reserveResult.modifiedCount === 0) {
     return { valid: false, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
+  }
+
+  const reservedSession = await OtpSession.findById(session._id).select('+otp');
+  if (!reservedSession || !reservedSession.otp) {
+    return { valid: false, message: 'OTP session is invalid. Please request a new OTP.' };
   }
 
   const otpMatches = await bcrypt.compare(otp, reservedSession.otp);
   if (!otpMatches) {
-    if (reservedSession.retryCount >= OTP_MAX_RETRIES) {
+    const updatedRetryCount = reservedSession.retryCount + 1;
+    if (updatedRetryCount >= OTP_MAX_RETRIES) {
       await OtpSession.updateOne(
         { _id: reservedSession._id, isUsed: false, isVerified: false },
         { $set: { isUsed: true } }
@@ -89,22 +94,21 @@ export const verifyOtp = async (
 
     return {
       valid: false,
-      message: `Invalid OTP. ${OTP_MAX_RETRIES - reservedSession.retryCount} attempts remaining.`,
+      message: `Invalid OTP. ${OTP_MAX_RETRIES - updatedRetryCount} attempts remaining.`,
     };
   }
 
-  const verifiedSession = await OtpSession.findOneAndUpdate(
+  const verifiedResult = await OtpSession.updateOne(
     {
       _id: reservedSession._id,
       isUsed: false,
       isVerified: false,
       expiresAt: { $gt: new Date() },
     },
-    { $set: { isVerified: true, isUsed: true } },
-    { new: true }
+    { $set: { isVerified: true, isUsed: true } }
   );
 
-  if (!verifiedSession) {
+  if (verifiedResult.matchedCount === 0 || verifiedResult.modifiedCount === 0) {
     return { valid: false, message: 'OTP has already been used or expired. Please request a new one.' };
   }
 
